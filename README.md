@@ -145,4 +145,5 @@ All changes made to this repository must follow the rules defined in `.agents/sk
 ---
 
 ## 📄 License
+
 This project is open-source under the [MIT License](LICENSE).
