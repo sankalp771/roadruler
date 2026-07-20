@@ -7,7 +7,7 @@
 ## Deliverables Checklist
 
 ### Phase 1: Ingestion & Model Pipeline (Days 1–7)
-- [ ] **Day 1:** Python ML environment setup, YOLOv8 inference wrapper class `RoadDamageDetector`.
+- [x] **Day 1:** Python ML environment setup, YOLOv8 inference wrapper class `RoadDamageDetector`.
 - [ ] **Day 2:** RDD2022 dataset formatting script converting annotations to YOLO format.
 - [ ] **Day 3:** YOLOv8 model training on road damage classes; export `best.pt`.
 - [ ] **Day 4:** Damage Severity Score calculator combining bounding box area ratio and class weights.
