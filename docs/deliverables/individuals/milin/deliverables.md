@@ -7,7 +7,7 @@
 ## Deliverables Checklist
 
 ### Phase 1: Core UI & Authentication (Days 1–7)
-- [ ] **Day 1:** Scaffolding Vite React app, TailwindCSS setup, base router (`/`, `/report`, `/track`, `/authority`, `/public`).
+- [x] **Day 1:** Scaffolding Vite React app, TailwindCSS setup, base router (`/`, `/report`, `/track`, `/authority`, `/public`).
 - [ ] **Day 2:** Clerk React SDK integration, `<ClerkProvider>`, Login/Signup modals, `<ProtectedRoute />` component.
 - [ ] **Day 3:** Leaflet.js + OpenStreetMap `<LocationPickerMap />` with draggable marker & geolocation.
 - [ ] **Day 4:** `<ReportIssueForm />` component with photo upload preview, category dropdown, description, map location.
