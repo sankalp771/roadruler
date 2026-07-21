@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: #F9FAFB;
+  background-color: #0B0F19;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --bg-main: #0B0F19;
+  --bg-surface: #111827;
+  --bg-surface-hover: #1F2937;
+  --bg-card: #131B2E;
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
+  --primary-glow: rgba(59, 130, 246, 0.25);
+  --critical: #EF4444;
+  --critical-glow: rgba(239, 68, 68, 0.25);
+  --moderate: #F59E0B;
+  --success: #10B981;
+  --border-subtle: #1F2937;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg-main);
+  color: #F9FAFB;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0F19;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F2937;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* Glassmorphism & UI Utilities */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(19, 27, 46, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 24px -4px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px -2px rgba(59, 130, 246, 0.35);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px -2px rgba(239, 68, 68, 0.35);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #93C5FD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-critical {
+  background: linear-gradient(135deg, #FCA5A5 0%, #EF4444 50%, #F87171 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
