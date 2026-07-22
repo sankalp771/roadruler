@@ -26,3 +26,6 @@ yolov8n.pt
 .idea/
 .DS_Store
 Thumbs.db
+
+# Backend
+backend/.env
