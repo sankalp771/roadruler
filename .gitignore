@@ -26,3 +26,7 @@ yolov8n.pt
 .idea/
 .DS_Store
 Thumbs.db
+
+# Data directories
+ai_engine/data/
+
