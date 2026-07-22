@@ -28,12 +28,12 @@ description: Enforces detailed change logging, real test verification, project c
    - If a command or test fails, document the exact failure output and your step-by-step resolution/rollback.
 
 3. **MANDATORY LOGGING WORKFLOW:**
-   Whenever you complete or modify any code on behalf of a developer (**Milin**, **Utkarsh**, or **Sankalp**):
+   Whenever you complete or modify any code or perform any Git-related action (branch changes, push commands, PR setup, or repository protection ruleset updates) on behalf of a developer (**Milin**, **Utkarsh**, or **Sankalp**):
 
-   **Step A:** Identify the developer based on the file paths modified:
+   **Step A:** Identify the developer based on the file paths modified or target domains:
    - `frontend/` $\rightarrow$ **Milin**
    - `backend/` $\rightarrow$ **Utkarsh**
-   - `ai_engine/` $\rightarrow$ **Sankalp**
+   - `ai_engine/` or Repository-wide Git/Ruleset Setup $\rightarrow$ **Sankalp**
 
    **Step B:** Append a timestamped entry to `docs/daily_log/{developer}/YYYY-MM-DD.md` using the exact format below:
 
