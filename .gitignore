@@ -30,3 +30,5 @@ Thumbs.db
 # Data directories
 ai_engine/data/
 
+# Backend
+backend/.env
