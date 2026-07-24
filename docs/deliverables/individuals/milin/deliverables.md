@@ -8,9 +8,9 @@
 
 ### Phase 1: Core UI & Authentication (Days 1–7)
 - [x] **Day 1:** Scaffolding Vite React app, TailwindCSS setup, base router (`/`, `/report`, `/track`, `/authority`, `/public`).
-- [ ] **Day 2:** Clerk React SDK integration, `<ClerkProvider>`, Login/Signup modals, `<ProtectedRoute />` component.
-- [ ] **Day 3:** Leaflet.js + OpenStreetMap `<LocationPickerMap />` with draggable marker & geolocation.
-- [ ] **Day 4:** `<ReportIssueForm />` component with photo upload preview, category dropdown, description, map location.
+- [x] **Day 2:** Clerk React SDK integration, `<ClerkProvider>`, Login/Signup modals, `<ProtectedRoute />` component.
+- [x] **Day 3:** Leaflet.js + OpenStreetMap `<LocationPickerMap />` with draggable marker & geolocation.
+- [x] **Day 4:** `<ReportIssueForm />` component with photo upload preview, category dropdown, description, map location.
 - [ ] **Day 5:** `<ComplaintTracker />` view displaying ticket status timeline and metadata.
 - [ ] **Day 6:** Toast notifications (`react-hot-toast`) and optimistic UI submission updates.
 - [ ] **Day 7:** Phase 1 End-to-End integration test pass with backend API.

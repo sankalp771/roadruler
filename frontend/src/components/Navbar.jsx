@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import { 
   MapPin, 
   AlertTriangle, 
@@ -11,6 +12,7 @@ import {
   X,
   Sparkles
 } from 'lucide-react';
+
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -84,10 +86,31 @@ export default function Navbar() {
               <PlusCircle className="w-4 h-4" />
               <span>Report Issue</span>
             </Link>
+
+            <SignedIn>
+              <UserButton 
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8 rounded-full border border-blue-500/30 ring-2 ring-blue-500/20 shadow-md",
+                  }
+                }}
+              />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="px-3.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white border border-gray-700 text-xs font-semibold transition-all">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center">
+          <div className="flex md:hidden items-center gap-2">
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/80 focus:outline-none"
@@ -122,7 +145,7 @@ export default function Navbar() {
               </NavLink>
             );
           })}
-          <div className="pt-2 border-t border-gray-800">
+          <div className="pt-2 border-t border-gray-800 space-y-2">
             <Link
               to="/report"
               onClick={() => setMobileMenuOpen(false)}
@@ -131,9 +154,17 @@ export default function Navbar() {
               <PlusCircle className="w-4 h-4" />
               <span>Report Hazard Now</span>
             </Link>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="w-full py-2.5 px-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-sm font-semibold transition-all">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
           </div>
         </div>
       )}
     </header>
   );
 }
+
