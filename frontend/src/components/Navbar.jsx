@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { useAuth, SignInButton, UserButton } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { 
   MapPin, 
   AlertTriangle, 
@@ -10,12 +10,15 @@ import {
   PlusCircle, 
   Menu, 
   X,
+  LogOut,
+  User,
   Sparkles
 } from 'lucide-react';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isLoaded, isSignedIn } = useAuth();
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { isSignedIn, user, openSignInModal, signOut } = useAuth();
 
   const navItems = [
     { path: '/', label: 'Home', icon: MapPin },
@@ -87,29 +90,51 @@ export default function Navbar() {
               <span>Report Issue</span>
             </Link>
 
-            {isLoaded && isSignedIn ? (
-              <UserButton 
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8 rounded-full border border-blue-500/30 ring-2 ring-blue-500/20 shadow-md",
-                  }
-                }}
-              />
-            ) : (
-              <SignInButton mode="modal">
-                <button className="px-3.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white border border-gray-700 text-xs font-semibold transition-all">
-                  Sign In
+            {isSignedIn ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2 p-1 rounded-full border border-blue-500/40 hover:border-blue-400 bg-gray-900 transition-all focus:outline-none ring-2 ring-blue-500/20"
+                >
+                  <img
+                    src={user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                    alt="User avatar"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
                 </button>
-              </SignInButton>
+
+                {/* Profile Dropdown */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 glass-panel rounded-xl border border-gray-800 shadow-2xl py-2 space-y-1 z-50">
+                    <div className="px-4 py-2 border-b border-gray-800">
+                      <p className="text-xs font-bold text-white truncate">{user?.fullName || 'Milin Kanu'}</p>
+                      <p className="text-[11px] text-gray-400 truncate">{user?.email || 'citizen@roadruler.gov.in'}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setUserDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors font-medium"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={openSignInModal}
+                className="px-3.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white border border-gray-700 text-xs font-semibold transition-all active:scale-95"
+              >
+                Sign In
+              </button>
             )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2">
-            {isLoaded && isSignedIn && (
-              <UserButton afterSignOutUrl="/" />
-            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/80 focus:outline-none"
@@ -153,12 +178,27 @@ export default function Navbar() {
               <PlusCircle className="w-4 h-4" />
               <span>Report Hazard Now</span>
             </Link>
-            {(!isLoaded || !isSignedIn) && (
-              <SignInButton mode="modal">
-                <button className="w-full py-2.5 px-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-sm font-semibold transition-all">
-                  Sign In
-                </button>
-              </SignInButton>
+            {!isSignedIn ? (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openSignInModal();
+                }}
+                className="w-full py-2.5 px-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-sm font-semibold transition-all"
+              >
+                Sign In
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  signOut();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 px-4 rounded-lg bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/50 text-sm font-semibold transition-all flex items-center justify-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
             )}
           </div>
         </div>

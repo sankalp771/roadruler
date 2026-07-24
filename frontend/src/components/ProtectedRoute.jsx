@@ -1,22 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth, SignInButton } from '@clerk/clerk-react';
+import React from 'react';
+import { useAuth } from '../context/AuthContext';
 import { ShieldAlert, LogIn, Loader2 } from 'lucide-react';
 
 export default function ProtectedRoute({ children }) {
-  const { isLoaded, isSignedIn } = useAuth();
-  const [timedOut, setTimedOut] = useState(false);
+  const { isLoaded, isSignedIn, openSignInModal } = useAuth();
 
-  useEffect(() => {
-    // Timeout safeguard: if Clerk SDK takes more than 1 second to load, proceed to auth check
-    const timer = setTimeout(() => {
-      setTimedOut(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Show loading spinner briefly (max 1 second) while checking Clerk session
-  if (!isLoaded && !timedOut) {
+  if (!isLoaded) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
@@ -25,7 +14,6 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  // If unauthenticated or Clerk session check completed/timed out without login
   if (!isSignedIn) {
     return (
       <div className="max-w-md mx-auto my-16 p-8 glass-panel rounded-2xl border border-gray-800 text-center space-y-6">
@@ -40,12 +28,13 @@ export default function ProtectedRoute({ children }) {
           </p>
         </div>
 
-        <SignInButton mode="modal">
-          <button className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95">
-            <LogIn className="w-4 h-4" />
-            <span>Sign In to Continue</span>
-          </button>
-        </SignInButton>
+        <button
+          onClick={openSignInModal}
+          className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95 cursor-pointer"
+        >
+          <LogIn className="w-4 h-4" />
+          <span>Sign In to Continue</span>
+        </button>
       </div>
     );
   }
