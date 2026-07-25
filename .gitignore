@@ -29,6 +29,9 @@ Thumbs.db
 
 # Data directories
 ai_engine/data/
+ai_engine/pothole_imageset/
+ai_engine/pothole_annotated_results/
+
 
 # Backend
 backend/.env
