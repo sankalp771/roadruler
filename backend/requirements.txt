@@ -4,6 +4,8 @@ pydantic
 pydantic-settings
 sqlalchemy
 psycopg2-binary
+geoalchemy2
+alembic
 
 PyJWT
 cryptography
