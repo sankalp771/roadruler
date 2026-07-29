@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     CLERK_ISSUER: str = ""
     CLERK_JWKS_URL: str = ""
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: str = ""
+    
+    SUPABASE_URL: str = ""
+    SUPABASE_KEY: str = ""
 
     class Config:
         env_file = ".env"

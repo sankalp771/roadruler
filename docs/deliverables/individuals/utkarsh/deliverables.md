@@ -9,8 +9,8 @@
 ### Phase 1: Core API & PostGIS Setup (Days 1–7)
 - [x] **Day 1:** FastAPI application directory scaffolding, Pydantic settings config, Neon Postgres DB session, `/health` endpoint.
 - [x] **Day 2:** Clerk JWT verification middleware, `get_current_user` dependency, `/api/v1/users/me` route.
-- [ ] **Day 3:** PostGIS extension setup, `Complaint` spatial model with `GEOMETRY(Point, 4326)`, Alembic migrations.
-- [ ] **Day 4:** `POST /api/v1/complaints` with Supabase/S3 storage upload and PostGIS point insertion.
+- [x] **Day 3:** PostGIS extension setup, `Complaint` spatial model with `GEOMETRY(Point, 4326)`, Alembic migrations.
+- [x] **Day 4:** `POST /api/v1/complaints` with Supabase/S3 storage upload and PostGIS point insertion.
 - [ ] **Day 5:** Connect `ai_engine` severity module to complaint creation pipeline.
 - [ ] **Day 6:** Celery task queue setup with Redis broker; async task `process_complaint_ai_task`.
 - [ ] **Day 7:** Phase 1 End-to-End integration test pass with frontend.
