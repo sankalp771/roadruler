@@ -10,3 +10,5 @@ alembic
 PyJWT
 cryptography
 httpx
+supabase
+python-multipart
