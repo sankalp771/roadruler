@@ -11,7 +11,7 @@
 - [x] **Day 2:** RDD2022 dataset formatting script converting annotations to YOLO format.
 - [x] **Day 3:** YOLOv8 model training on road damage classes; export `best.pt`.
 - [x] **Day 4:** Damage Severity Score calculator combining bounding box area ratio and class weights.
-- [ ] **Day 5:** ResNet50 2048-dim feature vector generator for visual duplicate matching.
+- [x] **Day 5:** ResNet50 2048-dim feature vector generator for visual duplicate matching.
 - [ ] **Day 6:** Single entrypoint function `analyze_road_issue(image_bytes)` for worker context.
 - [ ] **Day 7:** Phase 1 End-to-End integration test pass with backend Celery worker.
 
