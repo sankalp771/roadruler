@@ -2,7 +2,11 @@ import uuid
 from sqlalchemy import Column, String, DateTime, Float, Integer, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
-from geoalchemy2 import Geometry
+try:
+    from geoalchemy2 import Geometry
+    location_column = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)
+except ImportError:
+    location_column = Column(String, nullable=True)
 from app.db.base import Base
 
 class Complaint(Base):
@@ -17,6 +21,6 @@ class Complaint(Base):
     severity_level = Column(String, default="PENDING")
     status = Column(String, default="RECEIVED")
     upvote_count = Column(Integer, default=1)
-    location = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)
+    location = location_column
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

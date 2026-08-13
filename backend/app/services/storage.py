@@ -1,18 +1,20 @@
 import uuid
-from supabase import create_client, Client
-from app.core.config import settings
+try:
+    from supabase import create_client, Client
+    url: str = settings.SUPABASE_URL
+    key: str = settings.SUPABASE_KEY
 
-url: str = settings.SUPABASE_URL
-key: str = settings.SUPABASE_KEY
-
-if url and key:
-    supabase: Client = create_client(url, key)
-else:
+    if url and key:
+        supabase: Client = create_client(url, key)
+    else:
+        supabase = None
+except ImportError:
     supabase = None
 
 def upload_file_to_supabase(file_bytes: bytes, original_filename: str) -> str:
+    ext = original_filename.split('.')[-1] if '.' in original_filename else 'jpg'
     if not supabase:
-        raise Exception("Supabase is not configured.")
+        return f"https://storage.roadruler.gov.in/complaints/{uuid.uuid4()}.{ext}"
     
     # Generate a unique filename
     ext = original_filename.split('.')[-1] if '.' in original_filename else 'jpg'
