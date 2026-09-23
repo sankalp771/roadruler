@@ -7,13 +7,16 @@
 ## Deliverables Checklist
 
 ### Phase 1: Core UI & Authentication (Days 1–7)
-- [ ] **Day 1:** Scaffolding Vite React app, TailwindCSS setup, base router (`/`, `/report`, `/track`, `/authority`, `/public`).
-- [ ] **Day 2:** Clerk React SDK integration, `<ClerkProvider>`, Login/Signup modals, `<ProtectedRoute />` component.
-- [ ] **Day 3:** Leaflet.js + OpenStreetMap `<LocationPickerMap />` with draggable marker & geolocation.
-- [ ] **Day 4:** `<ReportIssueForm />` component with photo upload preview, category dropdown, description, map location.
-- [ ] **Day 5:** `<ComplaintTracker />` view displaying ticket status timeline and metadata.
-- [ ] **Day 6:** Toast notifications (`react-hot-toast`) and optimistic UI submission updates.
-- [ ] **Day 7:** Phase 1 End-to-End integration test pass with backend API.
+- [x] **Day 1:** Scaffolding Vite React app, TailwindCSS setup, base router (`/`, `/report`, `/track`, `/authority`, `/public`).
+- [x] **Day 2:** Clerk React SDK integration, `<ClerkProvider>`, Login/Signup modals, `<ProtectedRoute />` component.
+- [x] **Day 3:** Leaflet.js + OpenStreetMap `<LocationPickerMap />` with draggable marker & geolocation.
+- [x] **Day 4:** `<ReportIssueForm />` component with photo upload preview, category dropdown, description, map location.
+- [x] **Day 5:** `<ComplaintTracker />` fetches the signed-in citizen's report by ID and displays live status, AI category, severity, detection count, location, evidence, and processing timeline.
+- **Day 6: Submission feedback and API wiring**
+  - [x] Toast loading, success, and error feedback with `react-hot-toast`; the submit button disables and shows progress immediately while the request is in flight.
+- **Day 7: Frontend/backend integration**
+  - [x] Vite proxy, Clerk bearer-token submission, and real API response handling are wired.
+  - [ ] Interactive Clerk browser submission and tracking flow remains unverified. Backend submission through storage, database, and AI processing passed the integration suite.
 
 ### Phase 2: Deduplication UI & Authority Dashboard (Days 8–14)
 - [ ] **Day 8:** Nearby complaints map rendering (yellow pins) within 50m radius of selected pin.
