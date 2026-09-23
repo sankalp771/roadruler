@@ -118,6 +118,9 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python -m alembic upgrade head
+cd ..
+python ai_engine/scripts/download_pothole_weights.py
+cd backend
 python -m uvicorn app.main:app --reload
 ```
 

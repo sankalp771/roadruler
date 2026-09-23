@@ -15,6 +15,8 @@
 - [x] **Day 6:** Single entrypoint function `analyze_road_issue(image_bytes)` for worker context.
 - [x] **Day 7:** Phase 1 end-to-end integration test passes through the backend Celery task and AI enrichment.
 
+- **Model setup note:** Runtime supports the downloaded RDD-trained YOLOv8s checkpoint (`road_damage_v8s.pt`); accuracy benchmarking on RoadRuler data is still pending.
+
 ### Phase 2: Deduplication & Spatial Clustering (Days 8–14)
 - [ ] **Day 8:** Spatial + visual deduplication pipeline (`check_duplicate`).
 - [ ] **Day 9:** Deduplication benchmark suite on test dataset confirming $>90\%$ precision.

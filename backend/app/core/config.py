@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = ""
 
     REDIS_URL: str = "redis://localhost:6379/0"
-    # Empty string -> ai_service resolves to <repo_root>/ai_engine/weights/best.pt
+    # Empty string -> ai_service prefers downloaded road_damage_v8s.pt, then best.pt.
     AI_WEIGHTS_PATH: str = ""
 
     class Config:
