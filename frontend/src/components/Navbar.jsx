@@ -1,0 +1,243 @@
+import React, { useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { 
+  MapPin, 
+  AlertTriangle, 
+  Search, 
+  Shield, 
+  BarChart3, 
+  PlusCircle, 
+  Menu, 
+  X,
+  LogOut,
+  User,
+  Users,
+  Sparkles
+} from 'lucide-react';
+
+export default function Navbar() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { isSignedIn, user, openSignInModal, signOut } = useAuth();
+
+  const navItems = [
+    { path: '/', label: 'Home', icon: MapPin },
+    { path: '/report', label: 'Report Hazard', icon: AlertTriangle },
+    { path: '/track', label: 'Track Issue', icon: Search },
+    { path: '/authority', label: 'Authority Portal', icon: Shield },
+    { path: '/public', label: 'Public Transparency', icon: BarChart3 },
+  ];
+
+  return (
+    <header className="sticky top-0 z-50 glass-panel border-b border-gray-800/80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          
+          {/* Brand Logo */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 group-hover:bg-blue-600/30 group-hover:border-blue-500/50 transition-all duration-300 glow-blue">
+              <MapPin className="w-5 h-5 text-blue-400 animate-pulse" />
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+              </span>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-xl tracking-tight text-white group-hover:text-blue-400 transition-colors">
+                  Road<span className="text-blue-500">Ruler</span>
+                </span>
+                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  v1.0
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-400 font-medium hidden sm:block">
+                AI Infrastructure Management
+              </p>
+            </div>
+          </Link>
+
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 ${
+                      isActive
+                        ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-800/60 border border-transparent'
+                    }`
+                  }
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </NavLink>
+              );
+            })}
+          </nav>
+
+          {/* Desktop Right Action Buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              to="/report"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium text-xs shadow-md shadow-blue-500/20 hover:shadow-blue-500/35 transition-all duration-200 active:scale-95"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Report Issue</span>
+            </Link>
+
+            {isSignedIn ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full border border-blue-500/40 hover:border-blue-400 bg-gray-900 transition-all focus:outline-none ring-2 ring-blue-500/20 group"
+                >
+                  <img
+                    src={user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                    alt="User avatar"
+                    className="w-7 h-7 rounded-full object-cover border border-blue-500/40"
+                  />
+                  <span className="text-xs font-bold text-gray-200 group-hover:text-white transition-colors max-w-[100px] truncate">
+                    {user?.fullName?.split(' ')[0] || 'User'}
+                  </span>
+                </button>
+
+                {/* Profile Dropdown */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 glass-panel rounded-2xl border border-gray-800 shadow-2xl py-2 space-y-1 z-50 animate-fadeIn">
+                    <div className="px-4 py-2.5 border-b border-gray-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-white truncate">{user?.fullName}</p>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${user?.badgeColor || 'bg-blue-500/10 text-blue-400 border-blue-500/30'}`}>
+                          {user?.roleLabel || 'User'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-400 truncate">{user?.email}</p>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        openSignInModal();
+                      }}
+                      className="w-full px-4 py-2 text-left text-xs text-gray-300 hover:text-white hover:bg-gray-800/60 flex items-center gap-2 transition-colors font-medium"
+                    >
+                      <Users className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Switch Quick Login Role</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setUserDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors font-medium border-t border-gray-800/60"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={openSignInModal}
+                className="px-3.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white border border-gray-700 text-xs font-semibold transition-all active:scale-95 flex items-center gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                <span>Quick Sign In</span>
+              </button>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/80 focus:outline-none"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Nav Dropdown */}
+      {mobileMenuOpen && (
+        <div className="md:hidden glass-panel border-b border-gray-800 px-4 pt-2 pb-4 space-y-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+                      : 'text-gray-300 hover:bg-gray-800/60'
+                  }`
+                }
+              >
+                <Icon className="w-4 h-4" />
+                <span>{item.label}</span>
+              </NavLink>
+            );
+          })}
+          <div className="pt-2 border-t border-gray-800 space-y-2">
+            <Link
+              to="/report"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm shadow-md"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Report Hazard Now</span>
+            </Link>
+            {!isSignedIn ? (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openSignInModal();
+                }}
+                className="w-full py-2.5 px-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-sm font-semibold transition-all flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-4 h-4 text-blue-400" />
+                <span>Quick Sign In</span>
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openSignInModal();
+                  }}
+                  className="w-full py-2 px-3 rounded-lg bg-gray-800/80 text-gray-300 border border-gray-700 text-xs font-semibold flex items-center justify-center gap-2"
+                >
+                  <Users className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Switch Role ({user?.roleLabel})</span>
+                </button>
+                <button
+                  onClick={() => {
+                    signOut();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-lg bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/50 text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
