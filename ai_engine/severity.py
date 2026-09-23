@@ -18,6 +18,7 @@ CLASS_SEVERITY_WEIGHTS: Dict[str, float] = {
     "Alligator Crack": 0.7,
     "Longitudinal Crack": 0.4,
     "Transverse Crack": 0.4,
+    "Other": 0.4,
 }
 
 

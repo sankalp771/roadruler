@@ -12,3 +12,16 @@ cryptography
 httpx
 supabase
 python-multipart
+
+# AI inference (Day 5)
+ultralytics
+opencv-python-headless
+numpy
+pillow
+
+# Async worker queue (Day 6)
+celery
+redis
+
+# Integration testing (Day 7)
+pytest

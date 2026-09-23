@@ -12,15 +12,17 @@
 - [x] **Day 3:** YOLOv8 model training on road damage classes; export `best.pt`.
 - [x] **Day 4:** Damage Severity Score calculator combining bounding box area ratio and class weights.
 - [x] **Day 5:** ResNet50 2048-dim feature vector generator for visual duplicate matching.
-- [ ] **Day 6:** Single entrypoint function `analyze_road_issue(image_bytes)` for worker context.
-- [ ] **Day 7:** Phase 1 End-to-End integration test pass with backend Celery worker.
+- [x] **Day 6:** Single entrypoint function `analyze_road_issue(image_bytes)` for worker context.
+- [x] **Day 7:** Phase 1 end-to-end integration test passes through the backend Celery task and AI enrichment.
+
+- **Model setup note:** Runtime supports the downloaded RDD-trained YOLOv8s checkpoint (`road_damage_v8s.pt`); accuracy benchmarking on RoadRuler data is still pending.
 
 ### Phase 2: Deduplication & Spatial Clustering (Days 8–14)
 - [ ] **Day 8:** Spatial + visual deduplication pipeline (`check_duplicate`).
 - [ ] **Day 9:** Deduplication benchmark suite on test dataset confirming $>90\%$ precision.
 - [ ] **Day 10:** DBSCAN Geo-Spatial Clustering engine (`clustering.py`).
 - [ ] **Day 11:** Cluster Severity Summarizer ranking spatial zones by priority.
-- [ ] **Day 12:** Image Evidence Bounding Box Annotator saving annotated evidence JPEG.
+- [x] **Day 12:** Image Evidence Bounding Box Annotator saving annotated evidence JPEG.
 - [ ] **Day 13:** Synthetic Data Generator `seed_data.py` seeding 150 test complaints across Mumbai.
 - [ ] **Day 14:** Phase 2 End-to-End integration test pass.
 

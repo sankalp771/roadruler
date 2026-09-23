@@ -16,6 +16,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import LocationPickerMap from '../components/LocationPickerMap';
+import { useAuth } from '../context/AuthContext';
 
 const CATEGORIES = [
   { id: 'POTHOLE', label: 'Pothole (Severe Surface Cavity)', description: 'Deep holes or cracks causing vehicle hazard' },
@@ -27,6 +28,7 @@ const CATEGORIES = [
 
 export default function ReportIssue() {
   const navigate = useNavigate();
+  const { getToken } = useAuth();
 
   // Form State
   const [photo, setPhoto] = useState(null);
@@ -106,6 +108,14 @@ export default function ReportIssue() {
     const loadingToast = toast.loading('Uploading evidence & analyzing hazard with AI engine...');
 
     try {
+      // Real Clerk JWT — backend rejects unauthenticated submissions.
+      const token = await getToken();
+      if (!token) {
+        toast.dismiss(loadingToast);
+        toast.error('Please sign in with a real Clerk account (Google OAuth) to submit a live report.');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', photo);
       formData.append('category', category);
@@ -116,28 +126,24 @@ export default function ReportIssue() {
       const response = await axios.post('/api/v1/complaints', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
       });
 
       toast.dismiss(loadingToast);
-      toast.success('Report registered successfully! Redirecting to status tracker...');
+      toast.success(`Report registered! Status: ${response.data?.status || 'PROCESSING'} — AI analysis queued.`);
 
-      const complaintId = response.data?.id || response.data?.complaint_id || 'COMP-' + Math.floor(100000 + Math.random() * 900000);
-      
+      const complaintId = response.data?.id;
+
       setTimeout(() => {
         navigate(`/track?id=${complaintId}`);
       }, 1000);
 
     } catch (err) {
-      console.warn('[ReportIssue] Backend API post failed, applying optimistic navigation for demo:', err);
+      console.error('[ReportIssue] Backend API post failed:', err);
       toast.dismiss(loadingToast);
-      toast.success('Report logged! Redirecting to tracking timeline...');
-
-      // Fallback complaint ID for front-end demo flow
-      const mockId = 'COMP-' + Math.floor(100000 + Math.random() * 900000);
-      setTimeout(() => {
-        navigate(`/track?id=${mockId}`);
-      }, 1200);
+      const detail = err.response?.data?.detail || err.message || 'Unknown error';
+      toast.error(`Report submission failed: ${detail}`);
     } finally {
       setIsSubmitting(false);
     }

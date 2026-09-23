@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-import { useAuth as useClerkAuth, useUser as useClerkUser, ClerkProvider } from '@clerk/clerk-react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
+import { useAuth as useClerkAuth, useUser as useClerkUser, useClerk, ClerkProvider } from '@clerk/clerk-react';
 import { ShieldCheck, X, Sparkles, User, Shield, Cpu, CheckCircle2, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -40,6 +40,7 @@ const AuthContext = createContext({
   openSignInModal: () => {},
   signInAsRole: () => {},
   signOut: () => {},
+  getToken: async () => null,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -47,10 +48,12 @@ export const useAuth = () => useContext(AuthContext);
 function SmartAuthInner({ children }) {
   let clerkAuth = { isLoaded: false, isSignedIn: false };
   let clerkUser = { user: null };
+  let clerkInstance = null;
 
   try {
     clerkAuth = useClerkAuth();
     clerkUser = useClerkUser();
+    clerkInstance = useClerk();
   } catch (e) {
     // Clerk hooks context fallback
   }
@@ -87,6 +90,23 @@ function SmartAuthInner({ children }) {
     setShowModal(true);
   };
 
+  // Real Clerk JWT for backend API calls; null when using local demo auth.
+  const getToken = useCallback(async () => {
+    if (clerkAuth.isSignedIn && typeof clerkAuth.getToken === 'function') {
+      return clerkAuth.getToken();
+    }
+    return null;
+  }, [clerkAuth.isSignedIn, clerkAuth.getToken]);
+
+  const openRealClerkSignIn = () => {
+    if (clerkInstance) {
+      setShowModal(false);
+      clerkInstance.openSignIn({});
+    } else {
+      toast.error('Clerk is not configured (VITE_CLERK_PUBLISHABLE_KEY missing)');
+    }
+  };
+
   const effectiveSignedIn = (clerkAuth.isLoaded && clerkAuth.isSignedIn) || localSignedIn;
   const effectiveUser = (clerkUser && clerkUser.user) ? {
     fullName: clerkUser.user.fullName || clerkUser.user.firstName || 'Authenticated User',
@@ -105,6 +125,7 @@ function SmartAuthInner({ children }) {
         openSignInModal,
         signInAsRole: handleSignInAsRole,
         signOut: handleSignOut,
+        getToken,
       }}
     >
       {children}
@@ -223,9 +244,9 @@ function SmartAuthInner({ children }) {
               <div className="flex-grow border-t border-gray-800"></div>
             </div>
 
-            {/* Google OAuth Option */}
+            {/* Google OAuth Option (real Clerk sign-in -> real JWT for backend) */}
             <button
-              onClick={() => handleSignInAsRole('CITIZEN')}
+              onClick={openRealClerkSignIn}
               className="w-full py-3 px-4 rounded-xl bg-gray-900 hover:bg-gray-800 text-gray-200 border border-gray-800 text-xs font-semibold transition-all flex items-center justify-center gap-3"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">

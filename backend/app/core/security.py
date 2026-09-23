@@ -21,15 +21,23 @@ def verify_token(token: str):
             detail="Token is missing",
         )
         
-    jwks = get_jwks()
-    unverified_header = jwt.get_unverified_header(token)
-    rsa_key = {}
-    
-    if "kid" not in unverified_header:
+    try:
+        unverified_header = jwt.get_unverified_header(token)
+    except jwt.InvalidTokenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token header",
+        ) from exc
+
+    if not isinstance(unverified_header, dict) or "kid" not in unverified_header:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token header",
         )
+
+    # Reject malformed tokens locally; only valid JWT-shaped tokens need JWKS I/O.
+    jwks = get_jwks()
+    rsa_key = {}
 
     for key in jwks["keys"]:
         if key["kid"] == unverified_header["kid"]:
