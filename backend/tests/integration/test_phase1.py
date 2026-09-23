@@ -85,7 +85,7 @@ class TestDatabaseLayer:
                     )
                 )
             }
-            assert {"ai_category", "severity_score", "severity_level", "detections_count", "location"} <= cols
+            assert {"ai_category", "severity_score", "severity_level", "detections_count", "detection_details", "location"} <= cols
         finally:
             db.close()
 
@@ -123,8 +123,9 @@ class TestAIEngine:
 
         result = analyze_image(test_image_bytes)
         assert set(result) == {
-            "ai_category", "severity_score", "severity_level", "detections_count",
+            "ai_category", "severity_score", "severity_level", "detections_count", "detection_details",
         }
+        assert len(result["detection_details"]) == result["detections_count"]
         assert 0.0 <= result["severity_score"] <= 100.0
         assert result["severity_level"] in ("CRITICAL", "MODERATE", "MINOR")
 
@@ -200,6 +201,7 @@ class TestComplaintLifecycle:
             assert row.severity_level in ("CRITICAL", "MODERATE", "MINOR")
             assert 0.0 <= row.severity_score <= 100.0
             assert row.detections_count == task_result.result["detections_count"]
+            assert len(row.detection_details) == row.detections_count
         finally:
             try:
                 if created_id:

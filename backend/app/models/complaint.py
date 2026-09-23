@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, Float, Integer, Text
+from sqlalchemy import Column, String, DateTime, Float, Integer, Text, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from geoalchemy2 import Geometry
@@ -17,6 +17,7 @@ class Complaint(Base):
     severity_score = Column(Float, default=0.0)
     severity_level = Column(String, default="PENDING")
     detections_count = Column(Integer, nullable=False, default=0, server_default="0")
+    detection_details = Column(JSON, nullable=True)
     status = Column(String, default="RECEIVED")
     upvote_count = Column(Integer, default=1)
     location = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)

@@ -14,7 +14,7 @@
 - [x] **Day 5:** Connect `ai_engine` severity module to complaint creation pipeline and persist AI category, severity, and detection count.
 - [x] **Day 6:** Celery task queue setup with Redis broker; async task `process_complaint_ai_task`.
 - **Day 7: Phase 1 Integration**
-  - [x] Owner-scoped complaint detail endpoint and response schema implemented and covered by API tests.
+  - [x] Owner-scoped complaint detail endpoint returns AI detection count and per-region class/confidence/box details; API response covered by tests.
   - [x] Backend lifecycle verified end to end: authenticated submission, Supabase image upload, Neon/PostGIS persistence, Redis/Celery dispatch, and AI enrichment.
   - [ ] Interactive Clerk browser submission and tracking flow remains unverified.
 

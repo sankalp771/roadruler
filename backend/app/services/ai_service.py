@@ -114,6 +114,15 @@ def analyze_image(image_bytes: bytes) -> Dict[str, Any]:
         "severity_score": severity["severity_score"],
         "severity_level": severity["severity_level"],
         "detections_count": len(detections),
+        "detection_details": [
+            {
+                "class_id": int(detection.get("class_id", -1)),
+                "class_name": str(detection.get("class_name", "Unknown")),
+                "confidence": float(detection.get("confidence", 0.0)),
+                "bbox_normalized": detection.get("bbox_normalized"),
+            }
+            for detection in detections
+        ],
     }
     logger.info(
         "AI analysis complete: category=%s score=%s level=%s detections=%d",

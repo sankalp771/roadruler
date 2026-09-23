@@ -47,6 +47,14 @@ def complaint_client():
         severity_score=84.5,
         severity_level="CRITICAL",
         detections_count=3,
+        detection_details=[
+            {
+                "class_id": 3,
+                "class_name": "Pothole",
+                "confidence": 0.947,
+                "bbox_normalized": [0.1, 0.2, 0.4, 0.6],
+            }
+        ],
         status="RECEIVED",
         upvote_count=1,
         created_at=datetime(2026, 9, 23, tzinfo=timezone.utc),
@@ -68,6 +76,14 @@ def test_owner_can_read_complaint_with_location(complaint_client):
     assert body["status"] == "RECEIVED"
     assert body["ai_category"] == "Pothole"
     assert body["detections_count"] == 3
+    assert body["detection_details"] == [
+        {
+            "class_id": 3,
+            "class_name": "Pothole",
+            "confidence": 0.947,
+            "bbox_normalized": [0.1, 0.2, 0.4, 0.6],
+        }
+    ]
     assert body["location"] == {"lat": 19.076, "lng": 72.8777}
 
 
