@@ -99,6 +99,10 @@ export default function TrackComplaint() {
   const currentStep = STATUS_STEPS.findIndex((step) => step.value === complaint?.status);
   const statusLabel = complaint?.status?.replaceAll('_', ' ').toLowerCase();
   const isAnalyzing = complaint?.status === 'PROCESSING';
+  const detectionDetails = Array.isArray(complaint?.detection_details)
+    ? complaint.detection_details
+    : null;
+  const detectionCount = detectionDetails?.length ?? Number(complaint?.detections_count ?? 0);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
@@ -180,7 +184,13 @@ export default function TrackComplaint() {
             <p className="mt-1 text-lg font-bold text-white">{complaint.severity_level}</p>
             <p className="text-xs text-gray-400">Score: {Number(complaint.severity_score || 0).toFixed(1)} / 100</p>
             <p className="mt-1 text-xs text-gray-400">
-              {Number(complaint.detections_count || 0)} damage region{Number(complaint.detections_count || 0) === 1 ? '' : 's'} detected
+              {detectionDetails === null
+                ? (isAnalyzing
+                  ? 'Detection details are pending analysis'
+                  : detectionCount > 0
+                    ? `${detectionCount} damage region${detectionCount === 1 ? '' : 's'} detected; breakdown unavailable`
+                    : 'Detection count unavailable for this report')
+                : `${detectionCount} damage region${detectionCount === 1 ? '' : 's'} detected`}
             </p>
           </div>
           <div className="rounded-xl bg-gray-900/60 p-4">
@@ -189,6 +199,31 @@ export default function TrackComplaint() {
             {complaint.created_at && <p className="mt-1 text-xs text-gray-400">Submitted {new Date(complaint.created_at).toLocaleString()}</p>}
           </div>
         </div>
+
+        {detectionDetails !== null && (
+          <section aria-label="AI detected regions" className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-300">Detected damage regions</h4>
+              <span className="rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-300">
+                {detectionCount} found
+              </span>
+            </div>
+            {detectionDetails.length === 0 ? (
+              <p className="mt-3 text-sm text-gray-400">The AI analysis did not find damage regions in this image.</p>
+            ) : (
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                {detectionDetails.map((detection, index) => (
+                  <li key={`${detection.class_id}-${index}`} className="flex items-center justify-between gap-3 rounded-lg bg-gray-950/60 px-3 py-2.5">
+                    <span className="text-sm font-medium text-white">{detection.class_name}</span>
+                    <span className="shrink-0 text-xs tabular-nums text-gray-400">
+                      {`${(Number(detection.confidence) * 100).toFixed(1)}% confidence`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
 
         {complaint.image_url && <img src={complaint.image_url} alt="Evidence attached to this report" className="max-h-72 w-full rounded-xl object-cover" />}
 

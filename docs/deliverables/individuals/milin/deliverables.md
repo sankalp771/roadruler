@@ -11,7 +11,7 @@
 - [x] **Day 2:** Clerk React SDK integration, `<ClerkProvider>`, Login/Signup modals, `<ProtectedRoute />` component.
 - [x] **Day 3:** Leaflet.js + OpenStreetMap `<LocationPickerMap />` with draggable marker & geolocation.
 - [x] **Day 4:** `<ReportIssueForm />` component with photo upload preview, category dropdown, description, map location.
-- [x] **Day 5:** `<ComplaintTracker />` fetches the signed-in citizen's report by ID and displays live status, AI category, severity, detection count, location, evidence, and processing timeline.
+- [x] **Day 5:** `<ComplaintTracker />` fetches the signed-in citizen's report by ID and displays live status, AI category, severity, per-region detection class/confidence breakdown, location, evidence, and processing timeline.
 - **Day 6: Submission feedback and API wiring**
   - [x] Toast loading, success, and error feedback with `react-hot-toast`; the submit button disables and shows progress immediately while the request is in flight.
 - **Day 7: Frontend/backend integration**

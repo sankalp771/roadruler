@@ -51,6 +51,7 @@ def process_complaint_ai_task(self, complaint_id: str):
         complaint.severity_score = ai_result["severity_score"]
         complaint.severity_level = ai_result["severity_level"]
         complaint.detections_count = ai_result["detections_count"]
+        complaint.detection_details = ai_result["detection_details"]
         complaint.status = "RECEIVED"
         db.commit()
 

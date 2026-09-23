@@ -50,6 +50,7 @@ def read_complaint(
         severity_score=complaint.severity_score,
         severity_level=complaint.severity_level,
         detections_count=complaint.detections_count,
+        detection_details=complaint.detection_details,
         status=complaint.status,
         upvote_count=complaint.upvote_count,
         location=ComplaintLocation(lat=latitude, lng=longitude),

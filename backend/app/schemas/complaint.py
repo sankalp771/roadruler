@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -7,6 +7,13 @@ from pydantic import BaseModel, ConfigDict
 class ComplaintLocation(BaseModel):
     lat: float
     lng: float
+
+
+class AIDetection(BaseModel):
+    class_id: int
+    class_name: str
+    confidence: float
+    bbox_normalized: Optional[List[float]] = None
 
 
 class ComplaintRead(BaseModel):
@@ -20,6 +27,7 @@ class ComplaintRead(BaseModel):
     severity_score: float
     severity_level: str
     detections_count: int = 0
+    detection_details: Optional[List[AIDetection]] = None
     status: str
     upvote_count: int
     location: ComplaintLocation
