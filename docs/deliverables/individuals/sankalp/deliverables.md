@@ -15,7 +15,7 @@
 - [x] **Day 6:** Single entrypoint function `analyze_road_issue(image_bytes)` for worker context.
 - [x] **Day 7:** Phase 1 end-to-end integration test passes through the backend Celery task and AI enrichment.
 
-- **Model setup note:** Runtime supports the downloaded RDD-trained YOLOv8s checkpoint (`road_damage_v8s.pt`); accuracy benchmarking on RoadRuler data is still pending.
+- **Model setup note:** Default uses the pinned single-class pothole checkpoint (`pretrained_pothole.pt`); it does not classify cracks or waterlogging. The multi-class RDD candidate was weaker on the recent complaint sample set.
 
 ### Phase 2: Deduplication & Spatial Clustering (Days 8–14)
 - [ ] **Day 8:** Spatial + visual deduplication pipeline (`check_duplicate`).

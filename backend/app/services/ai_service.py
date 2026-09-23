@@ -21,7 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-PREFERRED_WEIGHTS_PATH = REPO_ROOT / "ai_engine" / "weights" / "road_damage_v8s.pt"
+PREFERRED_WEIGHTS_PATH = REPO_ROOT / "ai_engine" / "weights" / "pretrained_pothole.pt"
 DEFAULT_WEIGHTS_PATH = REPO_ROOT / "ai_engine" / "weights" / "best.pt"
 
 _detector = None

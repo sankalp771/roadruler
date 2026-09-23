@@ -124,6 +124,8 @@ cd backend
 python -m uvicorn app.main:app --reload
 ```
 
+The pinned default checkpoint is a single-class pothole detector. It does not classify cracks or waterlogging. To use a different model, set `AI_WEIGHTS_PATH` explicitly and validate it against RoadRuler images before deployment. The checkpoint is from the [PeterHdd YOLOv8 pothole model](https://huggingface.co/peterhdd/pothole-detection-yolov8) (Apache-2.0).
+
 ### 3. Frontend Setup
 ```bash
 cd frontend
