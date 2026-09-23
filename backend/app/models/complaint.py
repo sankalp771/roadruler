@@ -11,10 +11,12 @@ class Complaint(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, nullable=False)
     category = Column(String, nullable=False)
+    ai_category = Column(String, nullable=True)  # AI-detected class, e.g. "Pothole"
     description = Column(Text)
     image_url = Column(String, nullable=False)
     severity_score = Column(Float, default=0.0)
     severity_level = Column(String, default="PENDING")
+    detections_count = Column(Integer, nullable=False, default=0, server_default="0")
     status = Column(String, default="RECEIVED")
     upvote_count = Column(Integer, default=1)
     location = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)

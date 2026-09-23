@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
 
+    REDIS_URL: str = "redis://localhost:6379/0"
+    # Empty string -> ai_service resolves to <repo_root>/ai_engine/weights/best.pt
+    AI_WEIGHTS_PATH: str = ""
+
     class Config:
         env_file = ".env"
 

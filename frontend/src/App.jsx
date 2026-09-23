@@ -38,7 +38,7 @@ export default function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/track" element={<TrackComplaint />} />
+            <Route path="/track" element={<ProtectedRoute><TrackComplaint /></ProtectedRoute>} />
             <Route path="/authority" element={<AuthorityDashboard />} />
             <Route path="/public" element={<PublicPortal />} />
           </Routes>

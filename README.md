@@ -117,7 +117,8 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+python -m alembic upgrade head
+python -m uvicorn app.main:app --reload
 ```
 
 ### 3. Frontend Setup
@@ -130,6 +131,9 @@ npm run dev
 ### 4. Celery Worker Setup
 ```bash
 cd backend
+# Windows PowerShell (uses the project virtual environment and Windows-safe pool)
+.\venv\Scripts\python.exe -m celery -A app.core.celery_app worker --loglevel=info --pool=solo
+# Linux/macOS
 celery -A app.core.celery_app worker --loglevel=info
 ```
 
