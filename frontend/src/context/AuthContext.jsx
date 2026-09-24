@@ -122,8 +122,9 @@ function SmartAuthInner({
     avatar: clerkUser.user.imageUrl,
     roleLabel: 'Clerk Verified User',
     roleId: String(clerkUser.user.publicMetadata?.role || '').toUpperCase(),
+    isDemo: false,
     badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  } : (localSignedIn ? { ...activeRole, roleId: activeRole.id } : null);
+  } : (localSignedIn ? { ...activeRole, roleId: activeRole.id, isDemo: true } : null);
 
   return (
     <AuthContext.Provider

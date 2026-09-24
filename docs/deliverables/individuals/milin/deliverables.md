@@ -27,6 +27,7 @@
 - [x] **Day 13:** Authority toolbar supports ID/details search, ward, category, severity, status, and SLA filters.
 - [x] **Day 14:** Phase 2 API integration, frontend production build, and lint verification pass; interactive real-Clerk browser workflow remains unverified.
 - [x] **Admin profile console:** Existing Admin demo profile can open `/admin`; verified Clerk Admin profiles see the shared live operations dashboard. Live API data still requires backend-verified Clerk authorization.
+- [x] **Admin demo preview:** Local AI Admin quick login displays clearly labeled sample queue and hotspot data in read-only mode; live records and actions still require verified Clerk Admin authorization.
 
 ### Phase 3: Auto-Routing UI, Escalation & Transparency (Days 15–21)
 - [ ] **Day 15:** Department Ownership Badge on complaint cards.

@@ -9,6 +9,22 @@ import ComplaintActionModal from '../components/ComplaintActionModal';
 
 const DEFAULT_CENTER = [19.076, 72.8777];
 
+const ADMIN_DEMO_QUEUE = [
+  { id: 'DEMO-1042', category: 'POTHOLE', ai_category: 'POTHOLE', description: 'Large pothole near the east bus stop', ward_id: 'Ward 12', status: 'RECEIVED', severity_level: 'CRITICAL', severity_score: 91, created_at: '2026-09-23T08:30:00Z' },
+  { id: 'DEMO-1038', category: 'WATERLOGGING', ai_category: 'WATERLOGGING', description: 'Water collecting at the market crossing', ward_id: 'Ward 8', status: 'ASSIGNED', severity_level: 'CRITICAL', severity_score: 84, created_at: '2026-09-22T14:10:00Z' },
+  { id: 'DEMO-1031', category: 'CRACK', ai_category: 'CRACK', description: 'Road surface crack spreading across lane', ward_id: 'Ward 4', status: 'IN_REPAIR', severity_level: 'MODERATE', severity_score: 63, created_at: '2026-09-21T10:00:00Z' },
+  { id: 'DEMO-1024', category: 'POTHOLE', ai_category: 'POTHOLE', description: 'Pothole beside the community clinic', ward_id: 'Ward 12', status: 'PROCESSING', severity_level: 'MODERATE', severity_score: 58, created_at: '2026-09-20T09:20:00Z' },
+  { id: 'DEMO-1019', category: 'CRACK', ai_category: 'CRACK', description: 'Small surface crack on service road', ward_id: 'Ward 2', status: 'RECEIVED', severity_level: 'MINOR', severity_score: 28, created_at: '2026-09-19T16:45:00Z' },
+];
+
+const ADMIN_DEMO_HOTSPOTS = {
+  type: 'FeatureCollection',
+  features: [
+    { type: 'Feature', geometry: { type: 'Point', coordinates: [72.8777, 19.076] }, properties: { cluster_id: 'demo-1', complaint_count: 8, avg_severity: 72, dominant_category: 'POTHOLE', risk_level: 'HIGH_RISK_ZONE' } },
+    { type: 'Feature', geometry: { type: 'Point', coordinates: [72.865, 19.083] }, properties: { cluster_id: 'demo-2', complaint_count: 4, avg_severity: 49, dominant_category: 'WATERLOGGING', risk_level: 'STANDARD_RISK_ZONE' } },
+  ],
+};
+
 function formatDate(value) {
   if (!value) return 'Date unavailable';
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
@@ -40,7 +56,7 @@ function HotspotHeatLayer({ features }) {
   return null;
 }
 
-export default function AuthorityDashboard() {
+export default function AuthorityDashboard({ demoPreview = false }) {
   const { getToken, isSignedIn, openSignInModal } = useAuth();
   const [queue, setQueue] = useState({ items: [], total: 0, page: 1, limit: 20, pages: 0 });
   const [hotspots, setHotspots] = useState({ type: 'FeatureCollection', features: [] });
@@ -57,6 +73,7 @@ export default function AuthorityDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [requiresClerkAuth, setRequiresClerkAuth] = useState(false);
+  const [previewActive, setPreviewActive] = useState(false);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -64,11 +81,21 @@ export default function AuthorityDashboard() {
     try {
       const token = await getToken();
       if (!token) {
+        if (demoPreview) {
+          setPreviewActive(true);
+          setQueue({ items: ADMIN_DEMO_QUEUE, total: ADMIN_DEMO_QUEUE.length, page: 1, limit: 20, pages: 1 });
+          setHotspots(ADMIN_DEMO_HOTSPOTS);
+          setRequiresClerkAuth(false);
+          setError('Demo preview data only. Sign in with a verified Clerk Admin account to view live complaints and manage reports.');
+          return;
+        }
         setRequiresClerkAuth(true);
+        setPreviewActive(false);
         setError('The local demo role cannot access protected authority data. Use Clerk with a Ward Officer or Admin role to continue.');
         return;
       }
       setRequiresClerkAuth(false);
+      setPreviewActive(false);
       const headers = { Authorization: `Bearer ${token}` };
       const params = { page, limit: 20 };
       if (severity) params.severity = severity;
@@ -90,7 +117,7 @@ export default function AuthorityDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [category, getToken, page, search, severity, slaState, status, wardId]);
+  }, [category, demoPreview, getToken, page, search, severity, slaState, status, wardId]);
 
   useEffect(() => { loadDashboard(); }, [loadDashboard]);
   useEffect(() => {
@@ -110,7 +137,7 @@ export default function AuthorityDashboard() {
         <button onClick={loadDashboard} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-700 disabled:opacity-50"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</button>
       </header>
 
-      {error && <div role="alert" className="flex flex-col gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100 sm:flex-row sm:items-center sm:justify-between"><span>{error}</span>{(!isSignedIn || requiresClerkAuth) && <button onClick={openSignInModal} className="self-start rounded-lg bg-amber-400 px-3 py-2 font-semibold text-gray-950 sm:self-auto">Open sign in</button>}</div>}
+      {error && <div role="status" className="flex flex-col gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100 sm:flex-row sm:items-center sm:justify-between"><span>{error}</span>{(!isSignedIn || requiresClerkAuth) && <button onClick={openSignInModal} className="self-start rounded-lg bg-amber-400 px-3 py-2 font-semibold text-gray-950 sm:self-auto">Open sign in</button>}</div>}
 
       <section aria-label="Queue metrics" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="glass-card rounded-2xl p-5"><div className="flex items-center justify-between text-xs font-semibold uppercase text-gray-400">Active complaints <Layers className="h-4 w-4 text-blue-400" /></div><div className="mt-2 text-3xl font-black text-white">{queue.total}</div><p className="mt-1 text-xs text-gray-500">Matching current filters</p></div>
@@ -127,7 +154,7 @@ export default function AuthorityDashboard() {
             <label className="sr-only" htmlFor="authority-status">Filter status</label><select id="authority-status" value={status} onChange={(event) => { setPage(1); setStatus(event.target.value); }} className="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-white"><option value="">All active statuses</option><option>RECEIVED</option><option>PROCESSING</option><option>ASSIGNED</option><option>IN_REPAIR</option></select></div>
         </div>
         <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left text-sm"><thead className="bg-gray-950/70 text-xs uppercase text-gray-400"><tr><th className="px-4 py-3">Severity</th><th className="px-4 py-3">Complaint</th><th className="px-4 py-3">Ward</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Score</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Action</th></tr></thead>
-          <tbody className="divide-y divide-gray-800">{queue.items.map((item) => <tr key={item.id} className="hover:bg-gray-800/40"><td className="px-4 py-4"><span className="rounded-md border px-2 py-1 text-[10px] font-bold" style={{ color: severityColor(item.severity_level), borderColor: `${severityColor(item.severity_level)}55`, backgroundColor: `${severityColor(item.severity_level)}12` }}>{item.severity_level}</span></td><td className="px-4 py-4"><div className="font-semibold text-white">{item.ai_category || item.category}</div><div className="mt-1 max-w-xs truncate text-xs text-gray-500">{item.description || item.id}</div></td><td className="px-4 py-4 text-gray-300">{item.ward_id || 'Unassigned'}</td><td className="px-4 py-4 text-gray-300">{item.status}</td><td className="px-4 py-4 font-mono text-gray-200">{Number(item.severity_score).toFixed(1)}</td><td className="px-4 py-4 text-xs text-gray-400">{formatDate(item.created_at)}</td><td className="px-4 py-4"><button onClick={() => setSelectedComplaint(item)} className="rounded-lg border border-blue-500/30 px-3 py-1.5 text-xs font-semibold text-blue-300 hover:bg-blue-500/10">Manage</button></td></tr>)}
+          <tbody className="divide-y divide-gray-800">{queue.items.map((item) => <tr key={item.id} className="hover:bg-gray-800/40"><td className="px-4 py-4"><span className="rounded-md border px-2 py-1 text-[10px] font-bold" style={{ color: severityColor(item.severity_level), borderColor: `${severityColor(item.severity_level)}55`, backgroundColor: `${severityColor(item.severity_level)}12` }}>{item.severity_level}</span></td><td className="px-4 py-4"><div className="font-semibold text-white">{item.ai_category || item.category}</div><div className="mt-1 max-w-xs truncate text-xs text-gray-500">{item.description || item.id}</div></td><td className="px-4 py-4 text-gray-300">{item.ward_id || 'Unassigned'}</td><td className="px-4 py-4 text-gray-300">{item.status}</td><td className="px-4 py-4 font-mono text-gray-200">{Number(item.severity_score).toFixed(1)}</td><td className="px-4 py-4 text-xs text-gray-400">{formatDate(item.created_at)}</td><td className="px-4 py-4">{previewActive ? <span className="text-xs text-gray-500">Preview only</span> : <button onClick={() => setSelectedComplaint(item)} className="rounded-lg border border-blue-500/30 px-3 py-1.5 text-xs font-semibold text-blue-300 hover:bg-blue-500/10">Manage</button>}</td></tr>)}
             {!loading && queue.items.length === 0 && <tr><td colSpan="7" className="px-4 py-10 text-center text-sm text-gray-500">No complaints match these filters.</td></tr>}</tbody></table></div>
         <div className="flex items-center justify-between border-t border-gray-800 px-4 py-3 text-xs text-gray-400"><span>Page {queue.page} of {Math.max(queue.pages, 1)}</span><div className="flex gap-2"><button disabled={page <= 1 || loading} onClick={() => setPage((current) => current - 1)} className="rounded-lg border border-gray-700 px-3 py-1.5 disabled:opacity-40">Previous</button><button disabled={page >= queue.pages || loading} onClick={() => setPage((current) => current + 1)} className="rounded-lg border border-gray-700 px-3 py-1.5 disabled:opacity-40">Next</button></div></div>
       </section>

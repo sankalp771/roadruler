@@ -28,7 +28,7 @@ export default function AdminDashboard() {
         </div>
         <Link to="/public" className="ml-auto text-sm text-blue-300 hover:text-blue-200">Public dashboard →</Link>
       </header>
-      <AuthorityDashboard />
+      <AuthorityDashboard demoPreview={user.isDemo} />
     </div>
   );
 }
