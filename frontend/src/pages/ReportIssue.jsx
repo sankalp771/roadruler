@@ -16,6 +16,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import LocationPickerMap from '../components/LocationPickerMap';
+import DuplicateWarningModal from '../components/DuplicateWarningModal';
 import { useAuth } from '../context/AuthContext';
 
 const CATEGORIES = [
@@ -36,10 +37,13 @@ export default function ReportIssue() {
   const [category, setCategory] = useState('POTHOLE');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState({ lat: 19.0760, lng: 72.8777 }); // Default Mumbai center
+  const [nearbyComplaints, setNearbyComplaints] = useState([]);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   
   // Drag and Drop & Loading State
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpvoting, setIsUpvoting] = useState(false);
 
   // Photo Handlers
   const handleFileSelected = (file) => {
@@ -91,9 +95,7 @@ export default function ReportIssue() {
   };
 
   // Submit Handler
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const submitComplaint = async () => {
     if (!photo) {
       toast.error('Please attach a photo evidence of the hazard');
       return;
@@ -146,6 +148,44 @@ export default function ReportIssue() {
       toast.error(`Report submission failed: ${detail}`);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!photo) {
+      toast.error('Please attach a photo evidence of the hazard');
+      return;
+    }
+    if (!description.trim()) {
+      toast.error('Please provide a brief description of the hazard');
+      return;
+    }
+    if (nearbyComplaints.length > 0) {
+      setShowDuplicateWarning(true);
+      return;
+    }
+    submitComplaint();
+  };
+
+  const handleUpvote = async () => {
+    const candidate = nearbyComplaints[0];
+    if (!candidate) return;
+    setIsUpvoting(true);
+    try {
+      const token = await getToken();
+      if (!token) throw new Error('Sign in with your Clerk account to support a report.');
+      await axios.post(
+        `/api/v1/complaints/${encodeURIComponent(candidate.id)}/upvote`,
+        null,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success('Upvote recorded. Opening the existing report…');
+      navigate(`/track?id=${encodeURIComponent(candidate.id)}`);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || error.message || 'Could not support this report.');
+    } finally {
+      setIsUpvoting(false);
     }
   };
 
@@ -316,6 +356,8 @@ export default function ReportIssue() {
           <LocationPickerMap
             location={location}
             onLocationChange={setLocation}
+            getToken={getToken}
+            onNearbyComplaintsChange={setNearbyComplaints}
             height="320px"
           />
         </div>
@@ -351,6 +393,20 @@ export default function ReportIssue() {
         </div>
 
       </form>
+
+      {showDuplicateWarning && nearbyComplaints[0] && (
+        <DuplicateWarningModal
+          photoPreview={photoPreview}
+          complaint={nearbyComplaints[0]}
+          isUpvoting={isUpvoting}
+          onUpvote={handleUpvote}
+          onFileSeparate={() => {
+            setShowDuplicateWarning(false);
+            submitComplaint();
+          }}
+          onClose={() => setShowDuplicateWarning(false)}
+        />
+      )}
     </div>
   );
 }

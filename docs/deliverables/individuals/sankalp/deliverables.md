@@ -18,13 +18,13 @@
 - **Model setup note:** Default uses the pinned single-class pothole checkpoint (`pretrained_pothole.pt`); it does not classify cracks or waterlogging. The multi-class RDD candidate was weaker on the recent complaint sample set.
 
 ### Phase 2: Deduplication & Spatial Clustering (Days 8–14)
-- [ ] **Day 8:** Spatial + visual deduplication pipeline (`check_duplicate`).
-- [ ] **Day 9:** Deduplication benchmark suite on test dataset confirming $>90\%$ precision.
-- [ ] **Day 10:** DBSCAN Geo-Spatial Clustering engine (`clustering.py`).
-- [ ] **Day 11:** Cluster Severity Summarizer ranking spatial zones by priority.
+- [x] **Day 8:** Spatial + visual deduplication pipeline (`check_duplicate`) — cosine matching implemented and its focused tests pass; the backend suite verifies worker integration.
+- [ ] **Day 9:** Deduplication benchmark runner and metric tests are implemented; verified 50-positive/50-negative image-pair labels are still needed before reporting precision, recall, or F1.
+- [x] **Day 10:** DBSCAN Geo-Spatial Clustering engine (`clustering.py`) with Haversine distance, 50m radius, and noise handling; focused tests pass.
+- [x] **Day 11:** Cluster Severity Summarizer ranking spatial zones by priority with centroid, dominant category, and >60 high-risk threshold; focused tests pass.
 - [x] **Day 12:** Image Evidence Bounding Box Annotator saving annotated evidence JPEG.
-- [ ] **Day 13:** Synthetic Data Generator `seed_data.py` seeding 150 test complaints across Mumbai.
-- [ ] **Day 14:** Phase 2 End-to-End integration test pass.
+- [x] **Day 13:** Deterministic 150-record synthetic Mumbai complaint seeder with explicit `--apply`, database URL, and existing-image URL requirements; dry-run and generator tests pass. Database insertion is opt-in.
+- [x] **Day 14:** AI Phase 2 regression runner covers deduplication, benchmark validation, DBSCAN clustering, summaries, and seed generation.
 
 ### Phase 3: Quality Control & Model Optimization (Days 15–21)
 - [ ] **Day 15:** Image Quality Filter detecting blurriness (Laplacian variance) and corruption.

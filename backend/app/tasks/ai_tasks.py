@@ -47,6 +47,55 @@ def process_complaint_ai_task(self, complaint_id: str):
         image_bytes = _fetch_image_bytes(complaint.image_url)
         ai_result = analyze_image(image_bytes)
 
+        # Embedding extraction is optional for base AI enrichment so a missing
+        # ResNet checkpoint or dependency cannot strand a citizen submission.
+        embedding = None
+        match_id = None
+        try:
+            from ai_engine.deduplication import check_duplicate
+            from ai_engine.embeddings import extract_embedding
+            from geoalchemy2 import Geography
+            from sqlalchemy import cast, func
+
+            embedding = extract_embedding(image_bytes)
+            nearby = (
+                db.query(Complaint.id, Complaint.visual_embedding)
+                .filter(
+                    Complaint.id != complaint.id,
+                    Complaint.visual_embedding.isnot(None),
+                    Complaint.status.notin_(("RESOLVED", "CANCELLED")),
+                    func.ST_DWithin(
+                        cast(Complaint.location, Geography),
+                        cast(complaint.location, Geography),
+                        15.0,
+                    ),
+                )
+                .all()
+            )
+            is_duplicate, match_id, similarity = check_duplicate(
+                embedding,
+                ((candidate_id, candidate_embedding) for candidate_id, candidate_embedding in nearby),
+            )
+            if is_duplicate:
+                logger.info(
+                    "Complaint %s visually matches nearby complaint %s (cosine=%.3f)",
+                    complaint.id,
+                    match_id,
+                    similarity,
+                )
+        except Exception as embedding_error:
+            logger.warning("Visual deduplication skipped for complaint %s: %s", complaint.id, embedding_error)
+            # A failed PostGIS query can leave the SQLAlchemy transaction in
+            # an aborted state. Discard optional work before saving AI output.
+            db.rollback()
+            complaint = db.query(Complaint).filter(Complaint.id == complaint_id).first()
+            if complaint is None:
+                raise RuntimeError(f"Complaint {complaint_id} disappeared during AI enrichment")
+
+        if embedding is not None:
+            complaint.visual_embedding = embedding.tolist()
+            complaint.duplicate_of_id = match_id
+
         complaint.ai_category = ai_result["ai_category"]
         complaint.severity_score = ai_result["severity_score"]
         complaint.severity_level = ai_result["severity_level"]

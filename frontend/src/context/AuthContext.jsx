@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
 import { useAuth as useClerkAuth, useUser as useClerkUser, useClerk, ClerkProvider } from '@clerk/clerk-react';
-import { ShieldCheck, X, Sparkles, User, Shield, Cpu, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ShieldCheck, X, User, Shield, Cpu, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const USER_ROLES = {
@@ -43,20 +43,28 @@ const AuthContext = createContext({
   getToken: async () => null,
 });
 
+const NO_CLERK_AUTH = Object.freeze({ isLoaded: false, isSignedIn: false });
+const NO_CLERK_USER = Object.freeze({ user: null });
+
 export const useAuth = () => useContext(AuthContext);
 
-function SmartAuthInner({ children }) {
-  let clerkAuth = { isLoaded: false, isSignedIn: false };
-  let clerkUser = { user: null };
-  let clerkInstance = null;
+function SmartAuthWithClerk({ children }) {
+  const clerkAuth = useClerkAuth();
+  const clerkUser = useClerkUser();
+  const clerkInstance = useClerk();
+  return (
+    <SmartAuthInner clerkAuth={clerkAuth} clerkUser={clerkUser} clerkInstance={clerkInstance}>
+      {children}
+    </SmartAuthInner>
+  );
+}
 
-  try {
-    clerkAuth = useClerkAuth();
-    clerkUser = useClerkUser();
-    clerkInstance = useClerk();
-  } catch (e) {
-    // Clerk hooks context fallback
-  }
+function SmartAuthInner({
+  children,
+  clerkAuth = NO_CLERK_AUTH,
+  clerkUser = NO_CLERK_USER,
+  clerkInstance = null,
+}) {
 
   const [localSignedIn, setLocalSignedIn] = useState(() => {
     return localStorage.getItem('roadruler_demo_auth') === 'true';
@@ -96,7 +104,7 @@ function SmartAuthInner({ children }) {
       return clerkAuth.getToken();
     }
     return null;
-  }, [clerkAuth.isSignedIn, clerkAuth.getToken]);
+  }, [clerkAuth]);
 
   const openRealClerkSignIn = () => {
     if (clerkInstance) {
@@ -113,8 +121,9 @@ function SmartAuthInner({ children }) {
     email: clerkUser.user.primaryEmailAddress?.emailAddress || 'user@roadruler.gov.in',
     avatar: clerkUser.user.imageUrl,
     roleLabel: 'Clerk Verified User',
+    roleId: String(clerkUser.user.publicMetadata?.role || '').toUpperCase(),
     badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  } : (localSignedIn ? activeRole : null);
+  } : (localSignedIn ? { ...activeRole, roleId: activeRole.id } : null);
 
   return (
     <AuthContext.Provider
@@ -274,7 +283,7 @@ export function SmartAuthProvider({ children }) {
   if (publishableKey) {
     return (
       <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
-        <SmartAuthInner>{children}</SmartAuthInner>
+        <SmartAuthWithClerk>{children}</SmartAuthWithClerk>
       </ClerkProvider>
     );
   }

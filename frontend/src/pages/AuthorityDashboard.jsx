@@ -1,147 +1,144 @@
-import React from 'react';
-import { Shield, AlertTriangle, Clock, CheckCircle2, Filter, Layers, ChevronRight } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
+import L from 'leaflet';
+import 'leaflet.heat';
+import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet';
+import { AlertTriangle, Layers, Map, RefreshCw, Shield } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import ComplaintActionModal from '../components/ComplaintActionModal';
+
+const DEFAULT_CENTER = [19.076, 72.8777];
+
+function formatDate(value) {
+  if (!value) return 'Date unavailable';
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+}
+
+function severityColor(level) {
+  if (level === 'CRITICAL') return '#ef4444';
+  if (level === 'MODERATE') return '#f59e0b';
+  return '#eab308';
+}
+
+function HotspotHeatLayer({ features }) {
+  const map = useMap();
+  useEffect(() => {
+    const points = features.map((feature) => {
+      const [longitude, latitude] = feature.geometry.coordinates;
+      const intensity = Math.min(1, feature.properties.complaint_count / 10);
+      return [latitude, longitude, intensity];
+    });
+    const layer = L.heatLayer(points, {
+      radius: 34,
+      blur: 26,
+      maxZoom: 17,
+      gradient: { 0.2: '#facc15', 0.55: '#fb923c', 0.8: '#ef4444', 1: '#b91c1c' },
+    });
+    layer.addTo(map);
+    return () => { map.removeLayer(layer); };
+  }, [features, map]);
+  return null;
+}
 
 export default function AuthorityDashboard() {
+  const { getToken, isSignedIn, openSignInModal } = useAuth();
+  const [queue, setQueue] = useState({ items: [], total: 0, page: 1, limit: 20, pages: 0 });
+  const [hotspots, setHotspots] = useState({ type: 'FeatureCollection', features: [] });
+  const [severity, setSeverity] = useState('');
+  const [status, setStatus] = useState('');
+  const [category, setCategory] = useState('');
+  const [wardId, setWardId] = useState('');
+  const [slaState, setSlaState] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [search, setSearch] = useState('');
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [page, setPage] = useState(1);
+  const [heatmapEnabled, setHeatmapEnabled] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [requiresClerkAuth, setRequiresClerkAuth] = useState(false);
+
+  const loadDashboard = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const token = await getToken();
+      if (!token) {
+        setRequiresClerkAuth(true);
+        setError('The local demo role cannot access protected authority data. Use Clerk with a Ward Officer or Admin role to continue.');
+        return;
+      }
+      setRequiresClerkAuth(false);
+      const headers = { Authorization: `Bearer ${token}` };
+      const params = { page, limit: 20 };
+      if (severity) params.severity = severity;
+      if (status) params.status = status;
+      if (category) params.category = category;
+      if (wardId) params.ward_id = wardId;
+      if (search) params.search = search;
+      if (slaState) params.sla_state = slaState;
+      const [queueResponse, hotspotsResponse] = await Promise.all([
+        axios.get('/api/v1/authority/complaints', { headers, params }),
+        axios.get('/api/v1/analytics/hotspots', { headers }),
+      ]);
+      setQueue(queueResponse.data);
+      setHotspots(hotspotsResponse.data);
+    } catch (requestError) {
+      if (requestError.response?.status === 403) setError('Your verified account does not have Ward Officer or Admin access.');
+      else if (requestError.response?.status === 401) { setRequiresClerkAuth(true); setError('Your Clerk session has expired. Sign in again to continue.'); }
+      else setError('Could not load authority data. Check the API connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [category, getToken, page, search, severity, slaState, status, wardId]);
+
+  useEffect(() => { loadDashboard(); }, [loadDashboard]);
+  useEffect(() => {
+    const timer = setTimeout(() => { setPage(1); setSearch(searchText.trim()); }, 300);
+    return () => clearTimeout(timer);
+  }, [searchText]);
+  const criticalCount = useMemo(() => queue.items.filter((item) => item.severity_level === 'CRITICAL').length, [queue.items]);
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-            <Shield className="w-3.5 h-3.5" />
-            <span>Municipal Authority Console</span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight mt-1">
-            Ward Officer Work Queue
-          </h1>
-          <p className="text-xs text-gray-400">
-            Real-time hazard triage, priority severity ranking, and contractor work order dispatch.
-          </p>
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300"><Shield className="h-3.5 w-3.5" /> Municipal Authority Console</div>
+          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white">Ward Officer Work Queue</h1>
+          <p className="mt-1 text-sm text-gray-400">Live complaints ranked by severity, with DBSCAN hotspot zones.</p>
         </div>
+        <button onClick={loadDashboard} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-700 disabled:opacity-50"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</button>
+      </header>
 
-        <div className="flex items-center gap-3">
-          <button className="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-xs text-gray-200 hover:text-white font-medium flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-gray-400" />
-            <span>Filter Queue</span>
-          </button>
-          <button className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors shadow-md">
-            + Dispatch Contractor
-          </button>
+      {error && <div role="alert" className="flex flex-col gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100 sm:flex-row sm:items-center sm:justify-between"><span>{error}</span>{(!isSignedIn || requiresClerkAuth) && <button onClick={openSignInModal} className="self-start rounded-lg bg-amber-400 px-3 py-2 font-semibold text-gray-950 sm:self-auto">Open sign in</button>}</div>}
+
+      <section aria-label="Queue metrics" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="glass-card rounded-2xl p-5"><div className="flex items-center justify-between text-xs font-semibold uppercase text-gray-400">Active complaints <Layers className="h-4 w-4 text-blue-400" /></div><div className="mt-2 text-3xl font-black text-white">{queue.total}</div><p className="mt-1 text-xs text-gray-500">Matching current filters</p></div>
+        <div className="glass-card rounded-2xl p-5"><div className="flex items-center justify-between text-xs font-semibold uppercase text-gray-400">Critical on this page <AlertTriangle className="h-4 w-4 text-red-400" /></div><div className="mt-2 text-3xl font-black text-red-400">{criticalCount}</div><p className="mt-1 text-xs text-gray-500">Of {queue.items.length} displayed reports</p></div>
+      </section>
+
+      <section className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900/50">
+        <div className="flex flex-col justify-between gap-3 border-b border-gray-800 p-4 sm:flex-row sm:items-center"><div><h2 className="text-sm font-bold uppercase tracking-wider text-white">Priority Queue</h2><p className="mt-1 text-xs text-gray-400">Showing {queue.items.length} of {queue.total} active complaints</p></div>
+          <div className="flex flex-wrap gap-2"><label className="sr-only" htmlFor="authority-search">Search complaint ID or details</label><input id="authority-search" type="search" maxLength={100} value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="Search ID or details" className="min-w-40 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-white" />
+            <label className="sr-only" htmlFor="authority-ward">Filter ward</label><input id="authority-ward" maxLength={64} value={wardId} onChange={(event) => { setPage(1); setWardId(event.target.value); }} placeholder="Ward ID" className="w-28 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-white" />
+            <label className="sr-only" htmlFor="authority-category">Filter hazard category</label><select id="authority-category" value={category} onChange={(event) => { setPage(1); setCategory(event.target.value); }} className="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-white"><option value="">All categories</option><option value="POTHOLE">Pothole</option><option value="CRACK">Crack</option><option value="WATERLOGGING">Waterlogging</option></select>
+            <label className="sr-only" htmlFor="authority-severity">Filter severity</label><select id="authority-severity" value={severity} onChange={(event) => { setPage(1); setSeverity(event.target.value); }} className="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-white"><option value="">All severities</option><option>CRITICAL</option><option>MODERATE</option><option>MINOR</option></select>
+            <label className="sr-only" htmlFor="authority-sla">Filter SLA state</label><select id="authority-sla" value={slaState} onChange={(event) => { setPage(1); setSlaState(event.target.value); }} className="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-white"><option value="">All SLA states</option><option value="WITHIN_SLA">Within SLA</option><option value="OVERDUE">Overdue</option></select>
+            <label className="sr-only" htmlFor="authority-status">Filter status</label><select id="authority-status" value={status} onChange={(event) => { setPage(1); setStatus(event.target.value); }} className="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-white"><option value="">All active statuses</option><option>RECEIVED</option><option>PROCESSING</option><option>ASSIGNED</option><option>IN_REPAIR</option></select></div>
         </div>
-      </div>
+        <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left text-sm"><thead className="bg-gray-950/70 text-xs uppercase text-gray-400"><tr><th className="px-4 py-3">Severity</th><th className="px-4 py-3">Complaint</th><th className="px-4 py-3">Ward</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Score</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Action</th></tr></thead>
+          <tbody className="divide-y divide-gray-800">{queue.items.map((item) => <tr key={item.id} className="hover:bg-gray-800/40"><td className="px-4 py-4"><span className="rounded-md border px-2 py-1 text-[10px] font-bold" style={{ color: severityColor(item.severity_level), borderColor: `${severityColor(item.severity_level)}55`, backgroundColor: `${severityColor(item.severity_level)}12` }}>{item.severity_level}</span></td><td className="px-4 py-4"><div className="font-semibold text-white">{item.ai_category || item.category}</div><div className="mt-1 max-w-xs truncate text-xs text-gray-500">{item.description || item.id}</div></td><td className="px-4 py-4 text-gray-300">{item.ward_id || 'Unassigned'}</td><td className="px-4 py-4 text-gray-300">{item.status}</td><td className="px-4 py-4 font-mono text-gray-200">{Number(item.severity_score).toFixed(1)}</td><td className="px-4 py-4 text-xs text-gray-400">{formatDate(item.created_at)}</td><td className="px-4 py-4"><button onClick={() => setSelectedComplaint(item)} className="rounded-lg border border-blue-500/30 px-3 py-1.5 text-xs font-semibold text-blue-300 hover:bg-blue-500/10">Manage</button></td></tr>)}
+            {!loading && queue.items.length === 0 && <tr><td colSpan="7" className="px-4 py-10 text-center text-sm text-gray-500">No complaints match these filters.</td></tr>}</tbody></table></div>
+        <div className="flex items-center justify-between border-t border-gray-800 px-4 py-3 text-xs text-gray-400"><span>Page {queue.page} of {Math.max(queue.pages, 1)}</span><div className="flex gap-2"><button disabled={page <= 1 || loading} onClick={() => setPage((current) => current - 1)} className="rounded-lg border border-gray-700 px-3 py-1.5 disabled:opacity-40">Previous</button><button disabled={page >= queue.pages || loading} onClick={() => setPage((current) => current + 1)} className="rounded-lg border border-gray-700 px-3 py-1.5 disabled:opacity-40">Next</button></div></div>
+      </section>
 
-      {/* Metrics Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <div className="glass-card p-5 rounded-2xl">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-400 uppercase">Active Complaints</span>
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-              <Layers className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-white mt-2">142</div>
-          <div className="text-[11px] text-blue-400 mt-1">18 new today</div>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-400 uppercase">Critical Hazards</span>
-            <div className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-red-400 mt-2">29</div>
-          <div className="text-[11px] text-red-400 mt-1">&lt; 24h SLA remaining</div>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-400 uppercase">Avg Response Time</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
-              <Clock className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-amber-400 mt-2">1.8 Days</div>
-          <div className="text-[11px] text-emerald-400 mt-1">↓ 14% improvement</div>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-400 uppercase">Resolved This Week</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-emerald-400 mt-2">87</div>
-          <div className="text-[11px] text-gray-400 mt-1">94% citizen satisfaction</div>
-        </div>
-
-      </div>
-
-      {/* Queue Table Scaffolding */}
-      <div className="glass-panel rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-            Priority Queue (Scheduled for Day 10 Table Implementation)
-          </h3>
-          <span className="text-xs text-gray-400">Showing 3 of 142 tickets</span>
-        </div>
-
-        <div className="divide-y divide-gray-800/80 text-xs">
-          
-          <div className="p-4 flex items-center justify-between hover:bg-gray-800/40 transition-colors">
-            <div className="flex items-center gap-3">
-              <span className="px-2 py-1 rounded bg-red-500/10 text-red-400 font-bold border border-red-500/20 text-[10px]">
-                CRITICAL
-              </span>
-              <div>
-                <p className="font-bold text-white">#RR-2026-89421 — Major Pothole Hazard</p>
-                <p className="text-gray-400">SV Road, Ward 3 | Submitted 2h ago</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-amber-400 font-mono">SLA: 46h left</span>
-              <ChevronRight className="w-4 h-4 text-gray-500" />
-            </div>
-          </div>
-
-          <div className="p-4 flex items-center justify-between hover:bg-gray-800/40 transition-colors">
-            <div className="flex items-center gap-3">
-              <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20 text-[10px]">
-                MODERATE
-              </span>
-              <div>
-                <p className="font-bold text-white">#RR-2026-89419 — Waterlogging & Drainage Block</p>
-                <p className="text-gray-400">Link Road, Ward 2 | Submitted 5h ago</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-emerald-400 font-mono">SLA: 6d left</span>
-              <ChevronRight className="w-4 h-4 text-gray-500" />
-            </div>
-          </div>
-
-          <div className="p-4 flex items-center justify-between hover:bg-gray-800/40 transition-colors">
-            <div className="flex items-center gap-3">
-              <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20 text-[10px]">
-                MINOR
-              </span>
-              <div>
-                <p className="font-bold text-white">#RR-2026-89402 — Broken Streetlight Pole</p>
-                <p className="text-gray-400">Western Express Hwy, Ward 5 | Submitted 1d ago</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-emerald-400 font-mono">SLA: 12d left</span>
-              <ChevronRight className="w-4 h-4 text-gray-500" />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
+      <section className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900/50"><div className="flex items-center justify-between border-b border-gray-800 p-4"><div><h2 className="text-sm font-bold uppercase tracking-wider text-white">Spatial Hotspots</h2><p className="mt-1 text-xs text-gray-400">Clusters contain at least three active complaints within 50 metres.</p></div><button aria-pressed={heatmapEnabled} onClick={() => setHeatmapEnabled((enabled) => !enabled)} className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-xs text-gray-200"><Map className="h-4 w-4" />{heatmapEnabled ? 'Hide overlay' : 'Show overlay'}</button></div>
+        <div className="h-[380px]"><MapContainer center={DEFAULT_CENTER} zoom={12} scrollWheelZoom className="h-full w-full"><TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {heatmapEnabled && <HotspotHeatLayer features={hotspots.features} />}
+          {heatmapEnabled && hotspots.features.map((feature) => { const [longitude, latitude] = feature.geometry.coordinates; const properties = feature.properties; const color = properties.risk_level === 'HIGH_RISK_ZONE' ? '#ef4444' : '#eab308'; return <CircleMarker key={properties.cluster_id} center={[latitude, longitude]} radius={6} pathOptions={{ color: '#fff', fillColor: color, fillOpacity: 1, weight: 1 }}><Popup><strong>{properties.risk_level}</strong><br />{properties.complaint_count} complaints · Avg severity {properties.avg_severity}<br />Main category: {properties.dominant_category}</Popup></CircleMarker>; })}
+        </MapContainer></div><p className="px-4 py-3 text-xs text-gray-500">{hotspots.features.length} clusters · red indicates average severity above 60; yellow indicates standard risk.</p>
+      </section>
+      {selectedComplaint && <ComplaintActionModal complaint={selectedComplaint} getToken={getToken} onClose={() => setSelectedComplaint(null)} onUpdated={loadDashboard} />}
     </div>
   );
 }

@@ -1,20 +1,109 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, UploadFile, File, Form, status, HTTPException
-from sqlalchemy import func
+from fastapi import APIRouter, Depends, UploadFile, File, Form, status, HTTPException, Query
+from sqlalchemy import func, cast
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from geoalchemy2.elements import WKTElement
+from geoalchemy2 import Geography
 import logging
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.complaint import Complaint
-from app.schemas.complaint import ComplaintRead, ComplaintLocation
+from app.models.complaint_upvote import ComplaintUpvote
+from app.schemas.complaint import ComplaintRead, ComplaintLocation, NearbyComplaintRead, ComplaintUpvoteRead
 from app.services.storage import delete_file_from_supabase, upload_file_to_supabase
 from app.tasks.ai_tasks import process_complaint_ai_task
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+@router.post("/{complaint_id}/upvote", response_model=ComplaintUpvoteRead)
+def upvote_complaint(
+    complaint_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Add one support vote per citizen to an open complaint."""
+    complaint = (
+        db.query(Complaint)
+        .filter(Complaint.id == complaint_id)
+        .with_for_update()
+        .first()
+    )
+    if complaint is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
+    if complaint.status in {"RESOLVED", "CANCELLED"}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Complaint is no longer open")
+
+    db.add(ComplaintUpvote(complaint_id=complaint_id, user_id=current_user["user_id"]))
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You have already supported this complaint",
+        ) from exc
+
+    complaint.upvote_count = (complaint.upvote_count or 0) + 1
+    try:
+        db.commit()
+        db.refresh(complaint)
+    except Exception:
+        db.rollback()
+        logger.exception("Failed to record upvote for complaint %s", complaint_id)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not record upvote")
+
+    return ComplaintUpvoteRead(
+        complaint_id=complaint.id,
+        upvote_count=complaint.upvote_count,
+        message="Upvote recorded successfully",
+    )
+
+
+@router.get("/nearby", response_model=list[NearbyComplaintRead])
+def read_nearby_complaints(
+    latitude: float = Query(..., ge=-90, le=90),
+    longitude: float = Query(..., ge=-180, le=180),
+    radius_meters: float = Query(15.0, gt=0, le=1000),
+    _current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Find active complaints within a physical distance of the selected point."""
+    point = func.ST_SetSRID(func.ST_MakePoint(longitude, latitude), 4326)
+    distance = func.ST_Distance(cast(Complaint.location, Geography), cast(point, Geography))
+    rows = (
+        db.query(
+            Complaint,
+            func.ST_Y(Complaint.location).label("latitude"),
+            func.ST_X(Complaint.location).label("longitude"),
+            distance.label("distance_meters"),
+        )
+        .filter(
+            func.ST_DWithin(cast(Complaint.location, Geography), cast(point, Geography), radius_meters),
+            Complaint.status.notin_(("RESOLVED", "CANCELLED")),
+            Complaint.user_id != _current_user["user_id"],
+        )
+        .order_by(distance.asc())
+        .limit(100)
+        .all()
+    )
+    return [
+        NearbyComplaintRead(
+            id=row[0].id,
+            category=row[0].category,
+            ai_category=row[0].ai_category,
+            image_url=row[0].image_url,
+            status=row[0].status,
+            upvote_count=row[0].upvote_count,
+            location=ComplaintLocation(lat=row.latitude, lng=row.longitude),
+            distance_meters=row.distance_meters,
+        )
+        for row in rows
+    ]
 
 
 @router.get("/{complaint_id}", response_model=ComplaintRead)
@@ -37,6 +126,25 @@ def read_complaint(
         .first()
     )
     if row is None:
+        is_supporter = (
+            db.query(ComplaintUpvote.complaint_id)
+            .filter(
+                ComplaintUpvote.complaint_id == complaint_id,
+                ComplaintUpvote.user_id == current_user["user_id"],
+            )
+            .first()
+        )
+        if is_supporter is not None:
+            row = (
+                db.query(
+                    Complaint,
+                    func.ST_Y(Complaint.location),
+                    func.ST_X(Complaint.location),
+                )
+                .filter(Complaint.id == complaint_id)
+                .first()
+            )
+    if row is None:
         # Do not reveal whether another citizen owns the supplied ID.
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
 
@@ -51,6 +159,7 @@ def read_complaint(
         severity_level=complaint.severity_level,
         detections_count=complaint.detections_count,
         detection_details=complaint.detection_details,
+        duplicate_of_id=complaint.duplicate_of_id,
         status=complaint.status,
         upvote_count=complaint.upvote_count,
         location=ComplaintLocation(lat=latitude, lng=longitude),

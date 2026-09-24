@@ -55,6 +55,7 @@ def complaint_client():
                 "bbox_normalized": [0.1, 0.2, 0.4, 0.6],
             }
         ],
+        duplicate_of_id=None,
         status="RECEIVED",
         upvote_count=1,
         created_at=datetime(2026, 9, 23, tzinfo=timezone.utc),

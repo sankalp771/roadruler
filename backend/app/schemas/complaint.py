@@ -28,7 +28,25 @@ class ComplaintRead(BaseModel):
     severity_level: str
     detections_count: int = 0
     detection_details: Optional[List[AIDetection]] = None
+    duplicate_of_id: Optional[str] = None
     status: str
     upvote_count: int
     location: ComplaintLocation
     created_at: Optional[datetime] = None
+
+
+class NearbyComplaintRead(BaseModel):
+    id: str
+    category: str
+    ai_category: Optional[str] = None
+    image_url: str
+    status: str
+    upvote_count: int
+    location: ComplaintLocation
+    distance_meters: float
+
+
+class ComplaintUpvoteRead(BaseModel):
+    complaint_id: str
+    upvote_count: int
+    message: str

@@ -44,6 +44,21 @@ def auth_client():
 
 
 @pytest.fixture()
+def authority_client():
+    """TestClient authenticated as a Clerk-verified ward officer."""
+    app.dependency_overrides[get_current_user] = lambda: {
+        "user_id": "user_integration_authority",
+        "payload": {
+            "sub": "user_integration_authority",
+            "public_metadata": {"role": "WARD_OFFICER"},
+        },
+    }
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.fixture()
 def test_image_bytes() -> bytes:
     """Generate a real in-memory JPEG (dark asphalt-like patch)."""
     from PIL import Image

@@ -19,13 +19,13 @@
   - [ ] Interactive Clerk browser submission and tracking flow remains unverified.
 
 ### Phase 2: Proximity Querying, Deduplication & Queue Management (Days 8–14)
-- [ ] **Day 8:** PostGIS spatial proximity query API `GET /api/v1/complaints/nearby`.
-- [ ] **Day 9:** Upvoting & ticket merging endpoint `POST /api/v1/complaints/{id}/upvote`.
-- [ ] **Day 10:** Authority Queue API `GET /api/v1/authority/complaints` with RBAC role validation.
-- [ ] **Day 11:** Hotspot GeoJSON API `GET /api/v1/analytics/hotspots`.
-- [ ] **Day 12:** Status Transition API `PATCH /api/v1/authority/complaints/{id}/status` with state machine checks.
-- [ ] **Day 13:** Dynamic SQLAlchemy filter query builder supporting multi-parameter search.
-- [ ] **Day 14:** Phase 2 End-to-End integration test pass.
+- [x] **Day 8:** PostGIS spatial proximity query API `GET /api/v1/complaints/nearby` — migration applied; live PostGIS radius and validation checks pass.
+- [x] **Day 9:** Upvoting & ticket merging endpoint `POST /api/v1/complaints/{id}/upvote` with one vote per citizen and supporter ticket access.
+- [x] **Day 10:** Authority Queue API `GET /api/v1/authority/complaints` with pagination, status/severity/ward filters, severity ordering, and Ward Officer/Admin RBAC.
+- [x] **Day 11:** Protected Hotspot GeoJSON API `GET /api/v1/analytics/hotspots`, backed by DBSCAN cluster summaries.
+- [x] **Day 12:** Status Transition API `PATCH /api/v1/authority/complaints/{id}/status` with sequential state machine, required resolution evidence, contractor/notes fields, and append-only action history.
+- [x] **Day 13:** Parameterized multi-filter authority query builder and status/severity composite index; verified index eligibility with `EXPLAIN ANALYZE`. Existing PostGIS location GIST index confirmed.
+- [x] **Day 14:** Phase 2 end-to-end test covers PostGIS nearby lookup, upvote idempotency, queue filters, hotspots, evidence upload path, and status transitions.
 
 ### Phase 3: Auto-Routing, SLA Escalation & Security (Days 15–21)
 - [ ] **Day 15:** PostGIS ward boundary spatial auto-routing engine using `ST_Intersects`.
