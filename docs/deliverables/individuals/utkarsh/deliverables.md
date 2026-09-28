@@ -29,8 +29,8 @@
 
 ### Phase 3: Auto-Routing, SLA Escalation & Security (Days 15–21)
 - [ ] **Day 15:** PostGIS `ward_boundaries` schema, `ST_Intersects` complaint routing, and department persistence implemented; apply migration, load trusted municipal boundary polygons, and verify routing before marking complete.
-- [x] **Day 16:** Celery Beat scans every 30 minutes; overdue reports are escalated once, audited, and logged as citizen notifications. Unit tests and offline Alembic generation pass; database migration remains unapplied.
-- [ ] **Day 17:** Public Analytics API `GET /api/v1/public/stats` with Redis caching.
+- [x] **Day 16:** Celery Beat scans every 30 minutes; overdue reports are escalated once, audited, and logged as citizen notifications. Migration is applied to the configured Neon database; authority queue/hotspots DB-backed check passes. Trusted Day 15 ward polygons remain unconfigured.
+- [x] **Day 17:** Anonymous `GET /api/v1/public/stats` returns aggregate and ward metrics, caches JSON in Redis for 300 seconds, and falls back to fresh database stats when Redis is unavailable; cache behavior and a live read-only DB response are verified.
 - [ ] **Day 18:** Notification Service creating in-app alerts and sending emails on status change.
 - [ ] **Day 19:** FastAPI RBAC dependencies `require_roles(["WARD_OFFICER", "ADMIN"])`.
 - [ ] **Day 20:** Immutable Audit Logger writing state changes to `audit_logs` table.

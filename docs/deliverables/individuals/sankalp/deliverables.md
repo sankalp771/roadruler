@@ -29,7 +29,8 @@
 ### Phase 3: Quality Control & Model Optimization (Days 15–21)
 - [x] **Day 15:** Image Quality Filter rejects corrupt, blurry, and very dark uploads; focused tests pass.
 - [x] **Day 16:** Repair verifier combines YOLO damage detections with ResNet scene similarity; injected-dependency decision tests pass. Real checkpoint calibration remains pending.
-- [ ] **Day 17:** ML evaluation charts (PR curves, Confusion Matrix) exported to deliverables.
+- [x] **Day 17 workflow:** Labeled binary-evaluation CSV validation and precision-recall/confusion-matrix PNG generation are implemented and tested.
+- [ ] **Day 17 data deliverable:** Export plots from an independently labeled model evaluation set; no such set is available in the repository, so no model performance metrics are claimed.
 - [ ] **Day 18:** YOLO model conversion to ONNX Runtime for fast CPU inference ($<120\text{ms}$).
 - [ ] **Day 19:** Image upload magic byte validation (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG).
 - [ ] **Day 20:** Celery worker queue stress testing under 50 simultaneous jobs.

@@ -27,10 +27,8 @@ def upgrade() -> None:
         sa.Column("priority", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("geom", Geometry(geometry_type="MULTIPOLYGON", srid=4326), nullable=False),
     )
-    op.create_index("idx_ward_boundaries_geom", "ward_boundaries", ["geom"], postgresql_using="gist")
 
 
 def downgrade() -> None:
-    op.drop_index("idx_ward_boundaries_geom", table_name="ward_boundaries")
     op.drop_table("ward_boundaries")
     op.drop_column("complaints", "department_name")
