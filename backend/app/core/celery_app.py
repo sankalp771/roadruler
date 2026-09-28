@@ -17,7 +17,7 @@ celery_app = Celery(
     "roadruler",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
-    include=["app.tasks.ai_tasks", "app.tasks.sla_tasks"],
+    include=["app.tasks.ai_tasks", "app.tasks.sla_tasks", "app.tasks.notification_tasks"],
 )
 
 celery_app.conf.update(

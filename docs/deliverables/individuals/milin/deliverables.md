@@ -33,7 +33,7 @@
 - [ ] **Day 15:** Department ownership badges added to authority queue and complaint tracker; end-to-end response verification pending backend migration and boundary data.
 - [x] **Day 16:** Authority queue shows a live SLA countdown with warning, urgent, overdue, and escalated states; utility tests and production build pass.
 - [x] **Day 17:** `/public` fetches current aggregate and ward metrics from the anonymous public stats API, with loading and API-unavailable states; production build passes.
-- [ ] **Day 18:** Notification Bell dropdown in header.
+- [x] **Day 18:** Signed-in Clerk users have a Notification Bell dropdown with unread count, periodic refresh, and mark-as-read; demo-only sessions do not call the protected notification API. Production build and lint pass.
 - [ ] **Day 19:** Role-based navigation guards hiding authority views from citizens.
 - [ ] **Day 20:** Audit History tab inside Authority Complaint detail view.
 - [ ] **Day 21:** Phase 3 End-to-End integration test pass.

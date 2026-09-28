@@ -41,7 +41,7 @@ class RoadDamageDetector:
         self.weights_path = weights_path
         logger.info(f"Loading YOLOv8 model from {self.weights_path}...")
         try:
-            self.model = YOLO(self.weights_path)
+            self.model = YOLO(self.weights_path, task="detect")
             logger.info("YOLOv8 model loaded successfully.")
         except Exception as e:
             logger.error(f"Failed to load YOLO model weights from {self.weights_path}: {str(e)}")
@@ -92,7 +92,10 @@ class RoadDamageDetector:
         image_bgr = self._preprocess_input(image_input)
         img_h, img_w = image_bgr.shape[:2]
 
-        results = self.model(image_bgr, conf=conf_threshold, verbose=False)
+        inference_options = {"conf": conf_threshold, "verbose": False}
+        if self.weights_path.lower().endswith(".onnx"):
+            inference_options["device"] = "cpu"
+        results = self.model(image_bgr, **inference_options)
 
         parsed_detections: List[Dict[str, Any]] = []
 

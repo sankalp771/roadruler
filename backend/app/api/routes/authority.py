@@ -12,6 +12,8 @@ from app.api.deps import require_roles
 from app.db.session import get_db
 from app.models.complaint import Complaint
 from app.models.complaint_action import ComplaintAction
+from app.services.notifications import create_status_notification
+from app.tasks.notification_tasks import send_status_update_email
 from app.schemas.authority import AuthorityComplaintPage, AuthorityComplaintRead
 from app.schemas.authority_actions import ComplaintStatusActionRead, ComplaintStatusUpdate
 from app.schemas.complaint import ComplaintLocation
@@ -110,6 +112,7 @@ def update_complaint_status(
     if update.status != "RESOLVED" and update.resolution_image_url:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="resolution_image_url is only accepted when resolving a complaint")
 
+    previous_status = complaint.status
     action = ComplaintAction(
         complaint_id=complaint.id,
         actor_user_id=current_user["user_id"],
@@ -121,6 +124,7 @@ def update_complaint_status(
     )
     complaint.status = update.status
     db.add(action)
+    create_status_notification(db, complaint, previous_status, update.status)
     try:
         db.commit()
         db.refresh(action)
@@ -128,6 +132,10 @@ def update_complaint_status(
         db.rollback()
         logger.exception("Failed to transition complaint %s to %s", complaint_id, update.status)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not update complaint status") from exc
+    try:
+        send_status_update_email.delay(complaint.user_id, complaint.id, previous_status, update.status)
+    except Exception:
+        logger.exception("Could not enqueue status email for complaint %s", complaint.id)
     return {
         "id": action.id,
         "complaint_id": action.complaint_id,

@@ -31,7 +31,8 @@
 - [x] **Day 16:** Repair verifier combines YOLO damage detections with ResNet scene similarity; injected-dependency decision tests pass. Real checkpoint calibration remains pending.
 - [x] **Day 17 workflow:** Labeled binary-evaluation CSV validation and precision-recall/confusion-matrix PNG generation are implemented and tested.
 - [ ] **Day 17 data deliverable:** Export plots from an independently labeled model evaluation set; no such set is available in the repository, so no model performance metrics are claimed.
-- [ ] **Day 18:** YOLO model conversion to ONNX Runtime for fast CPU inference ($<120\text{ms}$).
+- [x] **Day 18 export:** ONNX export tooling and ONNX Runtime CPU execution are verified with the preferred pothole checkpoint and `best.pt`; generated weights stay local/ignored.
+- [ ] **Day 18 latency target:** Preferred 640px checkpoint measured 287.73 ms median end-to-end on Intel Core i5-1035G1 CPU (30 runs, synthetic latency fixture); `best.pt` measured 122.81 ms but is not selected because its validation quality was weaker. Neither result meets `<120 ms` for the configured checkpoint; do not switch models without a labeled quality evaluation.
 - [ ] **Day 19:** Image upload magic byte validation (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG).
 - [ ] **Day 20:** Celery worker queue stress testing under 50 simultaneous jobs.
 - [ ] **Day 21:** Phase 3 End-to-End integration test pass.
@@ -44,3 +45,4 @@
 - [x] Completed Phase 2 and Admin Console commit `2745cd6` pushed to `origin/sankalp-ai` on 2026-09-24.
 - [x] Day 16 implementation commit `78bcdae` pushed to `origin/sankalp-ai` on 2026-09-29.
 - [x] Day 17 implementation commit `4974f75` pushed to `origin/sankalp-ai` on 2026-09-29; export of real evaluation plots remains pending labeled data.
+- [x] Day 18 implementation commit `7b2c9fd` pushed to `origin/sankalp-ai` on 2026-09-29; the `<120 ms` configured-checkpoint target remains open.

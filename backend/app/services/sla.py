@@ -1,5 +1,7 @@
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from collections.abc import Callable
 
 from sqlalchemy.orm import Session
 
@@ -7,6 +9,7 @@ from app.models.complaint import Complaint
 from app.models.complaint_action import ComplaintAction
 from app.models.notification import Notification
 
+logger = logging.getLogger(__name__)
 
 SLA_LIMITS = {
     "CRITICAL": timedelta(hours=48),
@@ -29,7 +32,11 @@ def sla_deadline(created_at: Optional[datetime], severity_level: Optional[str]) 
     return _as_utc(created_at) + duration
 
 
-def escalate_overdue_complaints(db: Session, now: Optional[datetime] = None) -> list[str]:
+def escalate_overdue_complaints(
+    db: Session,
+    now: Optional[datetime] = None,
+    email_dispatcher: Callable[[str, str, str, str], object] | None = None,
+) -> list[str]:
     """Escalate overdue active complaints exactly once and notify their owners."""
     current_time = _as_utc(now or datetime.now(timezone.utc))
     complaints = (
@@ -43,6 +50,7 @@ def escalate_overdue_complaints(db: Session, now: Optional[datetime] = None) -> 
         .all()
     )
     escalated_ids = []
+    email_jobs = []
     for complaint in complaints:
         if complaint.escalation_level:
             continue
@@ -65,5 +73,12 @@ def escalate_overdue_complaints(db: Session, now: Optional[datetime] = None) -> 
             message=f"Your road report {complaint.id} is overdue and has been escalated to the next authority level.",
         ))
         escalated_ids.append(complaint.id)
+        email_jobs.append((complaint.user_id, complaint.id, previous_status, "ESCALATED"))
     db.commit()
+    if email_dispatcher:
+        for email_job in email_jobs:
+            try:
+                email_dispatcher(*email_job)
+            except Exception:
+                logger.exception("Could not enqueue escalation email for complaint %s", email_job[1])
     return escalated_ids
