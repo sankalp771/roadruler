@@ -50,8 +50,9 @@ def test_sla_scan_escalates_overdue_items_once_and_creates_action_and_notificati
     db.query.return_value.filter.return_value.with_for_update.return_value.all.return_value = [
         overdue, within_sla, previously_escalated,
     ]
+    email_dispatcher = MagicMock()
 
-    escalated_ids = escalate_overdue_complaints(db, now=now)
+    escalated_ids = escalate_overdue_complaints(db, now=now, email_dispatcher=email_dispatcher)
 
     assert escalated_ids == ["complaint-overdue"]
     assert overdue.status == "ESCALATED"
@@ -65,6 +66,7 @@ def test_sla_scan_escalates_overdue_items_once_and_creates_action_and_notificati
     )
     assert notification.user_id == "citizen-1"
     assert notification.complaint_id == "complaint-overdue"
+    email_dispatcher.assert_called_once_with("citizen-1", "complaint-overdue", "IN_REPAIR", "ESCALATED")
     db.commit.assert_called_once_with()
 
 

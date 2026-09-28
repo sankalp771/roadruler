@@ -14,6 +14,13 @@ class Settings(BaseSettings):
 
     REDIS_URL: str = "redis://localhost:6379/0"
     PUBLIC_STATS_CACHE_TTL_SECONDS: int = 300
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+    SMTP_STARTTLS: bool = True
+    CLERK_API_BASE_URL: str = "https://api.clerk.com/v1"
     # Empty string -> ai_service prefers downloaded pretrained_pothole.pt, then best.pt.
     AI_WEIGHTS_PATH: str = ""
 

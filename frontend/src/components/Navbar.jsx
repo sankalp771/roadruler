@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import { 
   MapPin, 
   AlertTriangle, 
@@ -85,6 +86,7 @@ export default function Navbar() {
 
           {/* Desktop Right Action Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            <NotificationBell />
             <Link
               to="/report"
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium text-xs shadow-md shadow-blue-500/20 hover:shadow-blue-500/35 transition-all duration-200 active:scale-95"
@@ -159,6 +161,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2">
+            <NotificationBell />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/80 focus:outline-none"

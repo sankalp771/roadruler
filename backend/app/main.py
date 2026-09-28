@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import health, users, complaints, authority, analytics, public
+from app.api.routes import health, users, complaints, authority, analytics, public, notifications
 from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
@@ -10,6 +10,7 @@ app.include_router(complaints.router, prefix="/api/v1/complaints", tags=["compla
 app.include_router(authority.router, prefix="/api/v1/authority", tags=["authority"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["analytics"])
 app.include_router(public.router, prefix="/api/v1/public", tags=["public"])
+app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["notifications"])
 
 @app.get("/")
 def read_root():
