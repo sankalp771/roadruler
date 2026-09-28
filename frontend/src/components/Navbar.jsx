@@ -12,7 +12,6 @@ import {
   Menu, 
   X,
   LogOut,
-  User,
   Users,
   Sparkles,
   Cpu
@@ -27,7 +26,7 @@ export default function Navbar() {
     { path: '/', label: 'Home', icon: MapPin },
     { path: '/report', label: 'Report Hazard', icon: AlertTriangle },
     { path: '/track', label: 'Track Issue', icon: Search },
-    { path: '/authority', label: 'Authority Portal', icon: Shield },
+    ...(['AUTHORITY', 'ADMIN', 'WARD_OFFICER'].includes(user?.roleId) ? [{ path: '/authority', label: 'Authority Portal', icon: Shield }] : []),
     ...(user?.roleId === 'ADMIN' ? [{ path: '/admin', label: 'Admin Console', icon: Cpu }] : []),
     { path: '/public', label: 'Public Transparency', icon: BarChart3 },
   ];

@@ -33,7 +33,7 @@
 - [ ] **Day 17 data deliverable:** Export plots from an independently labeled model evaluation set; no such set is available in the repository, so no model performance metrics are claimed.
 - [x] **Day 18 export:** ONNX export tooling and ONNX Runtime CPU execution are verified with the preferred pothole checkpoint and `best.pt`; generated weights stay local/ignored.
 - [ ] **Day 18 latency target:** Preferred 640px checkpoint measured 287.73 ms median end-to-end on Intel Core i5-1035G1 CPU (30 runs, synthetic latency fixture); `best.pt` measured 122.81 ms but is not selected because its validation quality was weaker. Neither result meets `<120 ms` for the configured checkpoint; do not switch models without a labeled quality evaluation.
-- [ ] **Day 19:** Image upload magic byte validation (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG).
+- [x] **Day 19:** Upload validator checks JPEG, PNG, and WebP signatures, MIME agreement, image integrity, and 4096×4096 dimensions; focused tests pass.
 - [ ] **Day 20:** Celery worker queue stress testing under 50 simultaneous jobs.
 - [ ] **Day 21:** Phase 3 End-to-End integration test pass.
 

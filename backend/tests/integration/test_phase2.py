@@ -10,7 +10,7 @@ from app.models.complaint_action import ComplaintAction
 from app.models.complaint_upvote import ComplaintUpvote
 
 
-def test_phase2_report_to_resolution_workflow(auth_client, authority_client, monkeypatch):
+def test_phase2_report_to_resolution_workflow(auth_client, authority_client, monkeypatch, test_image_bytes):
     complaint_ids = [str(uuid.uuid4()) for _ in range(3)]
     ward_id = f"PHASE2_{uuid.uuid4().hex[:10]}"
     coordinates = [
@@ -99,7 +99,7 @@ def test_phase2_report_to_resolution_workflow(auth_client, authority_client, mon
         )
         evidence = authority_client.post(
             f"/api/v1/authority/complaints/{complaint_ids[0]}/resolution-image",
-            files={"file": ("resolution.jpg", b"test-image-bytes", "image/jpeg")},
+            files={"file": ("resolution.jpg", test_image_bytes, "image/jpeg")},
         )
         assert evidence.status_code == 200, evidence.text
         resolution_url = evidence.json()["resolution_image_url"]

@@ -191,9 +191,16 @@ async def create_complaint(
     operation = "read upload"
     try:
         # Read file bytes
-        file_bytes = await file.read()
+        file_bytes = await file.read(10 * 1024 * 1024 + 1)
+        if len(file_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Image must be 10 MB or smaller")
         if not file_bytes:
             raise HTTPException(status_code=422, detail="Uploaded file is empty")
+
+        from ai_engine.security_check import assess_image_security
+        security_check = assess_image_security(file_bytes, file.content_type)
+        if not security_check.is_secure:
+            raise HTTPException(status_code=422, detail={"code": security_check.reason, "message": "Uploaded file is not a supported safe image"})
 
         from ai_engine.quality_filter import assess_image_quality
         quality = assess_image_quality(file_bytes)

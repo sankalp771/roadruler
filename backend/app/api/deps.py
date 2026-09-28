@@ -28,14 +28,19 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 
 
 def _user_role(user: dict) -> str | None:
-    payload = user.get("payload", {})
+    payload = user.get("payload") or {}
+    if not isinstance(payload, dict):
+        return None
     metadata = payload.get("public_metadata") or payload.get("metadata") or {}
+    if not isinstance(metadata, dict):
+        return None
     role = payload.get("role") or metadata.get("role")
     return role.strip().upper() if isinstance(role, str) else None
 
 
 def require_roles(allowed_roles: Iterable[str]):
-    allowed = {role.upper() for role in allowed_roles}
+    roles = (allowed_roles,) if isinstance(allowed_roles, str) else allowed_roles
+    allowed = {role.strip().upper() for role in roles if isinstance(role, str) and role.strip()}
 
     def dependency(user: dict = Depends(get_current_user)) -> dict:
         if _user_role(user) not in allowed:

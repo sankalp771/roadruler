@@ -34,7 +34,7 @@
 - [x] **Day 16:** Authority queue shows a live SLA countdown with warning, urgent, overdue, and escalated states; utility tests and production build pass.
 - [x] **Day 17:** `/public` fetches current aggregate and ward metrics from the anonymous public stats API, with loading and API-unavailable states; production build passes.
 - [x] **Day 18:** Signed-in Clerk users have a Notification Bell dropdown with unread count, periodic refresh, and mark-as-read; demo-only sessions do not call the protected notification API. Production build and lint pass.
-- [ ] **Day 19:** Role-based navigation guards hiding authority views from citizens.
+- [x] **Day 19:** Role-based route guard protects authority/admin views and role-aware navigation hides authority links from citizens; build and lint pass.
 - [ ] **Day 20:** Audit History tab inside Authority Complaint detail view.
 - [ ] **Day 21:** Phase 3 End-to-End integration test pass.
 

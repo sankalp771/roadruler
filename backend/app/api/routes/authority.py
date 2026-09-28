@@ -165,6 +165,10 @@ def upload_resolution_image(
     image_bytes = file.file.read(10 * 1024 * 1024 + 1)
     if not image_bytes or len(image_bytes) > 10 * 1024 * 1024:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Resolution image must be between 1 byte and 10 MB")
+    from ai_engine.security_check import assess_image_security
+    security_check = assess_image_security(image_bytes, file.content_type)
+    if not security_check.is_secure:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail={"code": security_check.reason, "message": "Uploaded file is not a supported safe image"})
     try:
         image_url = upload_file_to_supabase(image_bytes, file.filename or "resolution.jpg", file.content_type)
     except Exception as exc:
