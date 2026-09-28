@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleGuard from './components/RoleGuard';
 import Home from './pages/Home';
 import ReportIssue from './pages/ReportIssue';
 import TrackComplaint from './pages/TrackComplaint';
@@ -40,8 +41,8 @@ export default function App() {
               } 
             />
             <Route path="/track" element={<ProtectedRoute><TrackComplaint /></ProtectedRoute>} />
-            <Route path="/authority" element={<AuthorityDashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/authority" element={<RoleGuard allowedRoles={['WARD_OFFICER', 'ADMIN']}><AuthorityDashboard /></RoleGuard>} />
+            <Route path="/admin" element={<RoleGuard allowedRoles={['ADMIN']}><AdminDashboard /></RoleGuard>} />
             <Route path="/public" element={<PublicPortal />} />
           </Routes>
         </main>

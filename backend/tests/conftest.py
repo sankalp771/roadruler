@@ -62,12 +62,12 @@ def authority_client():
 def test_image_bytes() -> bytes:
     """Generate a real in-memory JPEG (dark asphalt-like patch)."""
     from PIL import Image
+    import numpy as np
 
-    img = Image.new("RGB", (640, 640), color=(72, 70, 68))
-    # Draw a large dark blob so the image is not a uniform block
-    for x in range(200, 440):
-        for y in range(250, 420):
-            img.putpixel((x, y), (28, 26, 25))
+    rng = np.random.default_rng(2026)
+    pixels = rng.normal(72, 15, (640, 640, 3)).clip(0, 255).astype("uint8")
+    pixels[250:420, 200:440] = rng.normal(30, 12, (170, 240, 3)).clip(0, 255).astype("uint8")
+    img = Image.fromarray(pixels)
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=90)
     return buf.getvalue()

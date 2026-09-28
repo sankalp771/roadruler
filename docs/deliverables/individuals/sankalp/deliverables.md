@@ -33,7 +33,7 @@
 - [ ] **Day 17 data deliverable:** Export plots from an independently labeled model evaluation set; no such set is available in the repository, so no model performance metrics are claimed.
 - [x] **Day 18 export:** ONNX export tooling and ONNX Runtime CPU execution are verified with the preferred pothole checkpoint and `best.pt`; generated weights stay local/ignored.
 - [ ] **Day 18 latency target:** Preferred 640px checkpoint measured 287.73 ms median end-to-end on Intel Core i5-1035G1 CPU (30 runs, synthetic latency fixture); `best.pt` measured 122.81 ms but is not selected because its validation quality was weaker. Neither result meets `<120 ms` for the configured checkpoint; do not switch models without a labeled quality evaluation.
-- [ ] **Day 19:** Image upload magic byte validation (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG).
+- [x] **Day 19:** Upload validator checks JPEG, PNG, and WebP signatures, MIME agreement, image integrity, and 4096×4096 dimensions; focused tests pass.
 - [ ] **Day 20:** Celery worker queue stress testing under 50 simultaneous jobs.
 - [ ] **Day 21:** Phase 3 End-to-End integration test pass.
 
@@ -46,3 +46,4 @@
 - [x] Day 16 implementation commit `78bcdae` pushed to `origin/sankalp-ai` on 2026-09-29.
 - [x] Day 17 implementation commit `4974f75` pushed to `origin/sankalp-ai` on 2026-09-29; export of real evaluation plots remains pending labeled data.
 - [x] Day 18 implementation commit `7b2c9fd` pushed to `origin/sankalp-ai` on 2026-09-29; the `<120 ms` configured-checkpoint target remains open.
+- [x] Day 19 implementation commit `3ebeeda` pushed to `origin/sankalp-ai` on 2026-09-29.

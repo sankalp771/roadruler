@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Shield, Heart } from 'lucide-react';
+import { MapPin, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
@@ -37,9 +37,6 @@ export default function Footer() {
               </li>
               <li>
                 <Link to="/track" className="hover:text-blue-400 transition-colors">Complaint Tracker</Link>
-              </li>
-              <li>
-                <Link to="/authority" className="hover:text-blue-400 transition-colors">Authority Dashboard</Link>
               </li>
               <li>
                 <Link to="/public" className="hover:text-blue-400 transition-colors">Public Analytics Portal</Link>
