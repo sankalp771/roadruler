@@ -117,8 +117,14 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+python -m alembic upgrade head
+cd ..
+python ai_engine/scripts/download_pothole_weights.py
+cd backend
+python -m uvicorn app.main:app --reload
 ```
+
+The pinned default checkpoint is a single-class pothole detector. It does not classify cracks or waterlogging. To use a different model, set `AI_WEIGHTS_PATH` explicitly and validate it against RoadRuler images before deployment. The checkpoint is from the [PeterHdd YOLOv8 pothole model](https://huggingface.co/peterhdd/pothole-detection-yolov8) (Apache-2.0).
 
 ### 3. Frontend Setup
 ```bash
@@ -130,7 +136,16 @@ npm run dev
 ### 4. Celery Worker Setup
 ```bash
 cd backend
+# Windows PowerShell (uses the project virtual environment and Windows-safe pool)
+.\venv\Scripts\python.exe -m celery -A app.core.celery_app worker --loglevel=info --pool=solo
+# Linux/macOS
 celery -A app.core.celery_app worker --loglevel=info
+```
+
+Run Celery Beat as a separate process to scan for overdue complaint SLAs every 30 minutes:
+
+```bash
+celery -A app.core.celery_app beat --loglevel=info
 ```
 
 ---
