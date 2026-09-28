@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Search, MapPin, CheckCircle2, Clock, ShieldAlert, Cpu, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import DepartmentBadge from '../components/DepartmentBadge';
 
 const STATUS_STEPS = [
   { value: 'PROCESSING', label: 'Report received', detail: 'AI analysis is queued.', icon: Cpu },
@@ -161,6 +162,7 @@ export default function TrackComplaint() {
           <div className="min-w-0">
             <span className="text-xs text-gray-400 uppercase font-mono">Report #{complaint.id}</span>
             <h3 className="text-lg font-bold text-white">{complaint.ai_category || complaint.category}</h3>
+            <div className="mt-2"><DepartmentBadge departmentName={complaint.department_name} /></div>
             {complaint.description && <p className="mt-1 text-sm text-gray-400">{complaint.description}</p>}
           </div>
           <span className="ml-3 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-bold uppercase whitespace-nowrap">

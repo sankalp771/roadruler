@@ -9,6 +9,7 @@ import ReportIssue from './pages/ReportIssue';
 import TrackComplaint from './pages/TrackComplaint';
 import AuthorityDashboard from './pages/AuthorityDashboard';
 import PublicPortal from './pages/PublicPortal';
+import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
             />
             <Route path="/track" element={<ProtectedRoute><TrackComplaint /></ProtectedRoute>} />
             <Route path="/authority" element={<AuthorityDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/public" element={<PublicPortal />} />
           </Routes>
         </main>

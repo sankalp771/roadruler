@@ -21,11 +21,20 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-PREFERRED_WEIGHTS_PATH = REPO_ROOT / "ai_engine" / "weights" / "road_damage_v8s.pt"
+PREFERRED_WEIGHTS_PATH = REPO_ROOT / "ai_engine" / "weights" / "pretrained_pothole.pt"
 DEFAULT_WEIGHTS_PATH = REPO_ROOT / "ai_engine" / "weights" / "best.pt"
 
 _detector = None
 _detector_lock = threading.Lock()
+
+
+class ImageQualityError(ValueError):
+    """Raised when an upload cannot be analyzed at the configured quality."""
+
+    def __init__(self, reason: str, metrics: Dict[str, float]):
+        self.reason = reason
+        self.metrics = metrics
+        super().__init__(reason)
 
 
 def _resolve_weights_path() -> str:
@@ -102,6 +111,12 @@ def analyze_image(image_bytes: bytes) -> Dict[str, Any]:
     """
     if not image_bytes:
         raise ValueError("analyze_image received empty image bytes")
+
+    from ai_engine.quality_filter import assess_image_quality
+
+    quality = assess_image_quality(image_bytes)
+    if not quality.is_valid:
+        raise ImageQualityError(quality.reason or "INVALID_IMAGE", quality.metrics)
 
     from ai_engine.severity import calculate_severity
 

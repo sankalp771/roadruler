@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import axios from 'axios';
 import { Navigation, MapPin, CheckCircle2, Compass } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -35,8 +36,15 @@ const customPinIcon = L.divIcon({
   popupAnchor: [0, -36],
 });
 
+const nearbyPinIcon = L.divIcon({
+  className: 'nearby-complaint-pin',
+  html: '<span style="display:block;width:18px;height:18px;border:3px solid white;border-radius:50%;background:#eab308;box-shadow:0 2px 8px #0009"></span>',
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+});
+
 // Helper component to handle map clicks & center updates
-function MapEventsHandler({ position, onPositionChange }) {
+function MapEventsHandler({ onPositionChange }) {
   const map = useMap();
 
   useMapEvents({
@@ -67,10 +75,49 @@ function MapRecenter({ center }) {
 export default function LocationPickerMap({
   location = { lat: 19.0760, lng: 72.8777 },
   onLocationChange,
+  getToken,
+  onNearbyComplaintsChange,
   height = '320px',
 }) {
   const [locating, setLocating] = useState(false);
   const markerRef = useRef(null);
+  const [nearbyComplaints, setNearbyComplaints] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const token = await getToken?.();
+        if (!token) {
+          if (active) {
+            setNearbyComplaints([]);
+            onNearbyComplaintsChange?.([]);
+          }
+          return;
+        }
+        const response = await axios.get('/api/v1/complaints/nearby', {
+          params: { latitude: location.lat, longitude: location.lng, radius_meters: 50 },
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        if (active) {
+          setNearbyComplaints(response.data);
+          onNearbyComplaintsChange?.(response.data);
+        }
+      } catch (error) {
+        if (active && !axios.isCancel(error)) {
+          setNearbyComplaints([]);
+          onNearbyComplaintsChange?.([]);
+        }
+      }
+    }, 250);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [location.lat, location.lng, getToken, onNearbyComplaintsChange]);
 
   const eventHandlers = useMemo(
     () => ({
@@ -137,8 +184,24 @@ export default function LocationPickerMap({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          <MapEventsHandler position={location} onPositionChange={onLocationChange} />
+          <MapEventsHandler onPositionChange={onLocationChange} />
           <MapRecenter center={location} />
+
+          {nearbyComplaints.map((complaint) => (
+            <Marker
+              key={complaint.id}
+              position={[complaint.location.lat, complaint.location.lng]}
+              icon={nearbyPinIcon}
+            >
+              <Popup className="dark-popup">
+                <div className="w-48 space-y-2 p-1">
+                  <img src={complaint.image_url} alt="Nearby road issue" className="h-24 w-full rounded object-cover" />
+                  <p className="text-xs font-bold text-gray-900">{complaint.ai_category || complaint.category}</p>
+                  <p className="text-[11px] text-gray-600">{complaint.status} · {Math.round(complaint.distance_meters)} m away</p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
 
           <Marker
             draggable={true}

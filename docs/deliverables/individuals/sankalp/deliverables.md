@@ -15,21 +15,22 @@
 - [x] **Day 6:** Single entrypoint function `analyze_road_issue(image_bytes)` for worker context.
 - [x] **Day 7:** Phase 1 end-to-end integration test passes through the backend Celery task and AI enrichment.
 
-- **Model setup note:** Runtime supports the downloaded RDD-trained YOLOv8s checkpoint (`road_damage_v8s.pt`); accuracy benchmarking on RoadRuler data is still pending.
+- **Model setup note:** Default uses the pinned single-class pothole checkpoint (`pretrained_pothole.pt`); it does not classify cracks or waterlogging. The multi-class RDD candidate was weaker on the recent complaint sample set.
 
 ### Phase 2: Deduplication & Spatial Clustering (Days 8–14)
-- [ ] **Day 8:** Spatial + visual deduplication pipeline (`check_duplicate`).
-- [ ] **Day 9:** Deduplication benchmark suite on test dataset confirming $>90\%$ precision.
-- [ ] **Day 10:** DBSCAN Geo-Spatial Clustering engine (`clustering.py`).
-- [ ] **Day 11:** Cluster Severity Summarizer ranking spatial zones by priority.
+- [x] **Day 8:** Spatial + visual deduplication pipeline (`check_duplicate`) — cosine matching implemented and its focused tests pass; the backend suite verifies worker integration.
+- [ ] **Day 9:** Deduplication benchmark runner and metric tests are implemented; verified 50-positive/50-negative image-pair labels are still needed before reporting precision, recall, or F1.
+- [x] **Day 10:** DBSCAN Geo-Spatial Clustering engine (`clustering.py`) with Haversine distance, 50m radius, and noise handling; focused tests pass.
+- [x] **Day 11:** Cluster Severity Summarizer ranking spatial zones by priority with centroid, dominant category, and >60 high-risk threshold; focused tests pass.
 - [x] **Day 12:** Image Evidence Bounding Box Annotator saving annotated evidence JPEG.
-- [ ] **Day 13:** Synthetic Data Generator `seed_data.py` seeding 150 test complaints across Mumbai.
-- [ ] **Day 14:** Phase 2 End-to-End integration test pass.
+- [x] **Day 13:** Deterministic 150-record synthetic Mumbai complaint seeder with explicit `--apply`, database URL, and existing-image URL requirements; dry-run and generator tests pass. Database insertion is opt-in.
+- [x] **Day 14:** AI Phase 2 regression runner covers deduplication, benchmark validation, DBSCAN clustering, summaries, and seed generation.
 
 ### Phase 3: Quality Control & Model Optimization (Days 15–21)
-- [ ] **Day 15:** Image Quality Filter detecting blurriness (Laplacian variance) and corruption.
-- [ ] **Day 16:** "Before & After" Repair Verification module comparing pre/post repair photos.
-- [ ] **Day 17:** ML evaluation charts (PR curves, Confusion Matrix) exported to deliverables.
+- [x] **Day 15:** Image Quality Filter rejects corrupt, blurry, and very dark uploads; focused tests pass.
+- [x] **Day 16:** Repair verifier combines YOLO damage detections with ResNet scene similarity; injected-dependency decision tests pass. Real checkpoint calibration remains pending.
+- [x] **Day 17 workflow:** Labeled binary-evaluation CSV validation and precision-recall/confusion-matrix PNG generation are implemented and tested.
+- [ ] **Day 17 data deliverable:** Export plots from an independently labeled model evaluation set; no such set is available in the repository, so no model performance metrics are claimed.
 - [ ] **Day 18:** YOLO model conversion to ONNX Runtime for fast CPU inference ($<120\text{ms}$).
 - [ ] **Day 19:** Image upload magic byte validation (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG).
 - [ ] **Day 20:** Celery worker queue stress testing under 50 simultaneous jobs.
@@ -39,3 +40,7 @@
 - [ ] **Days 22–24:** Inference speed and memory usage optimization.
 - [ ] **Days 25–27:** Docker containerization of AI inference worker.
 - [ ] **Days 28–30:** Final KPI dossier report generation.
+### Repository publication
+- [x] Completed Phase 2 and Admin Console commit `2745cd6` pushed to `origin/sankalp-ai` on 2026-09-24.
+- [x] Day 16 implementation commit `78bcdae` pushed to `origin/sankalp-ai` on 2026-09-29.
+- [x] Day 17 implementation commit `4974f75` pushed to `origin/sankalp-ai` on 2026-09-29; export of real evaluation plots remains pending labeled data.

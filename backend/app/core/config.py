@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = ""
 
     REDIS_URL: str = "redis://localhost:6379/0"
-    # Empty string -> ai_service prefers downloaded road_damage_v8s.pt, then best.pt.
+    PUBLIC_STATS_CACHE_TTL_SECONDS: int = 300
+    # Empty string -> ai_service prefers downloaded pretrained_pothole.pt, then best.pt.
     AI_WEIGHTS_PATH: str = ""
 
     class Config:

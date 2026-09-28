@@ -55,6 +55,9 @@ def complaint_client():
                 "bbox_normalized": [0.1, 0.2, 0.4, 0.6],
             }
         ],
+        duplicate_of_id=None,
+        ward_id="WARD_3",
+        department_name="Ward Local Maintenance",
         status="RECEIVED",
         upvote_count=1,
         created_at=datetime(2026, 9, 23, tzinfo=timezone.utc),
@@ -74,6 +77,8 @@ def test_owner_can_read_complaint_with_location(complaint_client):
     body = response.json()
     assert body["id"] == "complaint-123"
     assert body["status"] == "RECEIVED"
+    assert body["ward_id"] == "WARD_3"
+    assert body["department_name"] == "Ward Local Maintenance"
     assert body["ai_category"] == "Pothole"
     assert body["detections_count"] == 3
     assert body["detection_details"] == [
