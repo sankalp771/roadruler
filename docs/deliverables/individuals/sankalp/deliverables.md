@@ -27,8 +27,8 @@
 - [x] **Day 14:** AI Phase 2 regression runner covers deduplication, benchmark validation, DBSCAN clustering, summaries, and seed generation.
 
 ### Phase 3: Quality Control & Model Optimization (Days 15–21)
-- [ ] **Day 15:** Image Quality Filter implemented with corrupt-image decode rejection, Laplacian blur score, and darkness threshold; verification pending.
-- [ ] **Day 16:** "Before & After" Repair Verification module comparing pre/post repair photos.
+- [x] **Day 15:** Image Quality Filter rejects corrupt, blurry, and very dark uploads; focused tests pass.
+- [x] **Day 16:** Repair verifier combines YOLO damage detections with ResNet scene similarity; injected-dependency decision tests pass. Real checkpoint calibration remains pending.
 - [ ] **Day 17:** ML evaluation charts (PR curves, Confusion Matrix) exported to deliverables.
 - [ ] **Day 18:** YOLO model conversion to ONNX Runtime for fast CPU inference ($<120\text{ms}$).
 - [ ] **Day 19:** Image upload magic byte validation (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG).

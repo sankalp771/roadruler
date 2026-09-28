@@ -9,6 +9,7 @@ Start a worker (from the backend/ directory, venv active):
 """
 
 from celery import Celery
+from celery.schedules import crontab
 
 from app.core.config import settings
 
@@ -16,7 +17,7 @@ celery_app = Celery(
     "roadruler",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
-    include=["app.tasks.ai_tasks"],
+    include=["app.tasks.ai_tasks", "app.tasks.sla_tasks"],
 )
 
 celery_app.conf.update(
@@ -33,4 +34,10 @@ celery_app.conf.update(
     task_time_limit=300,
     task_soft_time_limit=240,
     broker_connection_retry_on_startup=True,
+    beat_schedule={
+        "check-sla-deadlines-every-30-minutes": {
+            "task": "app.tasks.sla_tasks.check_sla_deadlines",
+            "schedule": crontab(minute="*/30"),
+        },
+    },
 )

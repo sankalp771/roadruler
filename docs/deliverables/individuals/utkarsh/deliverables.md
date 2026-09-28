@@ -29,7 +29,7 @@
 
 ### Phase 3: Auto-Routing, SLA Escalation & Security (Days 15–21)
 - [ ] **Day 15:** PostGIS `ward_boundaries` schema, `ST_Intersects` complaint routing, and department persistence implemented; apply migration, load trusted municipal boundary polygons, and verify routing before marking complete.
-- [ ] **Day 16:** Celery Beat periodic task checking SLA deadlines and escalating overdue tickets.
+- [x] **Day 16:** Celery Beat scans every 30 minutes; overdue reports are escalated once, audited, and logged as citizen notifications. Unit tests and offline Alembic generation pass; database migration remains unapplied.
 - [ ] **Day 17:** Public Analytics API `GET /api/v1/public/stats` with Redis caching.
 - [ ] **Day 18:** Notification Service creating in-app alerts and sending emails on status change.
 - [ ] **Day 19:** FastAPI RBAC dependencies `require_roles(["WARD_OFFICER", "ADMIN"])`.

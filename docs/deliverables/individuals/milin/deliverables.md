@@ -31,7 +31,7 @@
 
 ### Phase 3: Auto-Routing UI, Escalation & Transparency (Days 15–21)
 - [ ] **Day 15:** Department ownership badges added to authority queue and complaint tracker; end-to-end response verification pending backend migration and boundary data.
-- [ ] **Day 16:** SLA Countdown Timer on authority task cards.
+- [x] **Day 16:** Authority queue shows a live SLA countdown with warning, urgent, overdue, and escalated states; utility tests and production build pass.
 - [ ] **Day 17:** Public Transparency Portal homepage `/public`.
 - [ ] **Day 18:** Notification Bell dropdown in header.
 - [ ] **Day 19:** Role-based navigation guards hiding authority views from citizens.

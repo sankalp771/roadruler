@@ -6,6 +6,7 @@ const NEXT_STATUS = {
   RECEIVED: 'ASSIGNED',
   ASSIGNED: 'IN_REPAIR',
   IN_REPAIR: 'RESOLVED',
+  ESCALATED: 'ASSIGNED',
 };
 
 export default function ComplaintActionModal({ complaint, getToken, onClose, onUpdated }) {

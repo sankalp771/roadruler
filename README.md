@@ -142,6 +142,12 @@ cd backend
 celery -A app.core.celery_app worker --loglevel=info
 ```
 
+Run Celery Beat as a separate process to scan for overdue complaint SLAs every 30 minutes:
+
+```bash
+celery -A app.core.celery_app beat --loglevel=info
+```
+
 ---
 
 ## 📜 Development & Anti-Fabrication Guidelines
