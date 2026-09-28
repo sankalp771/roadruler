@@ -13,6 +13,7 @@ from app.models.complaint import Complaint
 from app.models.complaint_upvote import ComplaintUpvote
 from app.schemas.complaint import ComplaintRead, ComplaintLocation, NearbyComplaintRead, ComplaintUpvoteRead
 from app.services.storage import delete_file_from_supabase, upload_file_to_supabase
+from app.services.jurisdiction_routing import resolve_jurisdiction
 from app.tasks.ai_tasks import process_complaint_ai_task
 
 logger = logging.getLogger(__name__)
@@ -160,6 +161,8 @@ def read_complaint(
         detections_count=complaint.detections_count,
         detection_details=complaint.detection_details,
         duplicate_of_id=complaint.duplicate_of_id,
+        ward_id=complaint.ward_id,
+        department_name=complaint.department_name,
         status=complaint.status,
         upvote_count=complaint.upvote_count,
         location=ComplaintLocation(lat=latitude, lng=longitude),
@@ -192,6 +195,14 @@ async def create_complaint(
         if not file_bytes:
             raise HTTPException(status_code=422, detail="Uploaded file is empty")
 
+        from ai_engine.quality_filter import assess_image_quality
+        quality = assess_image_quality(file_bytes)
+        if not quality.is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={"code": quality.reason, "message": "Image quality is too low to process", "metrics": quality.metrics},
+            )
+
         # Upload to Supabase Storage
         operation = "upload image to storage"
         image_url = upload_file_to_supabase(file_bytes, file.filename, file.content_type)
@@ -199,6 +210,7 @@ async def create_complaint(
         # Create PostGIS point
         operation = "construct PostGIS point"
         location = WKTElement(f'POINT({longitude} {latitude})', srid=4326)
+        ward_id, department_name = resolve_jurisdiction(db, longitude, latitude)
 
         # Save raw complaint; AI enrichment happens asynchronously
         operation = "construct complaint record"
@@ -208,6 +220,8 @@ async def create_complaint(
             description=description,
             image_url=image_url,
             location=location,
+            ward_id=ward_id,
+            department_name=department_name,
             status="PROCESSING",
             severity_level="PENDING",
             detections_count=0,
@@ -244,6 +258,8 @@ async def create_complaint(
         "status": new_complaint.status,
         "severity_level": new_complaint.severity_level,
         "detections_count": new_complaint.detections_count,
+        "ward_id": new_complaint.ward_id,
+        "department_name": new_complaint.department_name,
         "image_url": new_complaint.image_url,
         "location": {"lat": latitude, "lng": longitude}
     }

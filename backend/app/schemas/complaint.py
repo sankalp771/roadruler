@@ -29,6 +29,8 @@ class ComplaintRead(BaseModel):
     detections_count: int = 0
     detection_details: Optional[List[AIDetection]] = None
     duplicate_of_id: Optional[str] = None
+    ward_id: Optional[str] = None
+    department_name: Optional[str] = None
     status: str
     upvote_count: int
     location: ComplaintLocation

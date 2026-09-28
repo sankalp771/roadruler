@@ -78,6 +78,7 @@ def list_authority_complaints(
             status=complaint.status,
             upvote_count=complaint.upvote_count or 0,
             ward_id=complaint.ward_id,
+            department_name=complaint.department_name,
             location=ComplaintLocation(lat=locations[complaint.id].latitude, lng=locations[complaint.id].longitude),
             created_at=complaint.created_at,
         )

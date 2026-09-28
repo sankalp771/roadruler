@@ -28,7 +28,7 @@
 - [x] **Day 14:** Phase 2 end-to-end test covers PostGIS nearby lookup, upvote idempotency, queue filters, hotspots, evidence upload path, and status transitions.
 
 ### Phase 3: Auto-Routing, SLA Escalation & Security (Days 15–21)
-- [ ] **Day 15:** PostGIS ward boundary spatial auto-routing engine using `ST_Intersects`.
+- [ ] **Day 15:** PostGIS `ward_boundaries` schema, `ST_Intersects` complaint routing, and department persistence implemented; apply migration, load trusted municipal boundary polygons, and verify routing before marking complete.
 - [ ] **Day 16:** Celery Beat periodic task checking SLA deadlines and escalating overdue tickets.
 - [ ] **Day 17:** Public Analytics API `GET /api/v1/public/stats` with Redis caching.
 - [ ] **Day 18:** Notification Service creating in-app alerts and sending emails on status change.

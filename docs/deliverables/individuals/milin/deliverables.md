@@ -30,7 +30,7 @@
 - [x] **Admin demo preview:** Local AI Admin quick login displays clearly labeled sample queue and hotspot data in read-only mode; live records and actions still require verified Clerk Admin authorization.
 
 ### Phase 3: Auto-Routing UI, Escalation & Transparency (Days 15–21)
-- [ ] **Day 15:** Department Ownership Badge on complaint cards.
+- [ ] **Day 15:** Department ownership badges added to authority queue and complaint tracker; end-to-end response verification pending backend migration and boundary data.
 - [ ] **Day 16:** SLA Countdown Timer on authority task cards.
 - [ ] **Day 17:** Public Transparency Portal homepage `/public`.
 - [ ] **Day 18:** Notification Bell dropdown in header.

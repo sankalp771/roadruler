@@ -21,6 +21,7 @@ class Complaint(Base):
     visual_embedding = Column(JSON, nullable=True)
     duplicate_of_id = Column(String, ForeignKey('complaints.id', ondelete='SET NULL'), nullable=True)
     ward_id = Column(String, nullable=True, index=True)
+    department_name = Column(String, nullable=True)
     status = Column(String, default="RECEIVED")
     upvote_count = Column(Integer, default=1)
     location = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)

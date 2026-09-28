@@ -17,6 +17,7 @@ class AuthorityComplaintRead(BaseModel):
     status: str
     upvote_count: int
     ward_id: Optional[str] = None
+    department_name: Optional[str] = None
     location: ComplaintLocation
     created_at: Optional[datetime] = None
 

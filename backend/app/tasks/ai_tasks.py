@@ -11,7 +11,7 @@ import httpx
 from app.core.celery_app import celery_app
 from app.db.session import SessionLocal
 from app.models.complaint import Complaint
-from app.services.ai_service import analyze_image
+from app.services.ai_service import ImageQualityError, analyze_image
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +113,15 @@ def process_complaint_ai_task(self, complaint_id: str):
             "status": "RECEIVED",
             **ai_result,
         }
+    except ImageQualityError as exc:
+        db.rollback()
+        complaint = db.query(Complaint).filter(Complaint.id == complaint_id).first()
+        if complaint is not None:
+            complaint.status = "REJECTED"
+            complaint.severity_level = "PENDING"
+            db.commit()
+        logger.info("Complaint %s rejected by image quality filter: %s %s", complaint_id, exc.reason, exc.metrics)
+        return {"complaint_id": complaint_id, "status": "REJECTED", "reason": exc.reason}
     except Exception as exc:
         db.rollback()
         logger.exception(f"AI processing failed for complaint {complaint_id}: {exc}")
